@@ -5,6 +5,13 @@
 export interface EventsMap {
   [event: string]: any;
 }
+/**
+ * The default events map, used if no EventsMap is given. Using this EventsMap
+ * is equivalent to accepting all event names, and any data.
+ */
+export interface DefaultEventsMap {
+  [event: string]: (...args: any[]) => void;
+}
 
 type Callback = (...args: any[]) => void;
 
@@ -60,7 +67,7 @@ export const newEventBus = <
 	ReservedEvents extends EventsMap = {},
 >() => {
 	const handlers = new Map<string | symbol, Callback[]>();
-	return {
+	const bus =   {
 		on<Ev extends ReservedOrUserEventNames<ReservedEvents, ListenEvents>>(
 			event: Ev,
 			fn: ReservedOrUserListener<ReservedEvents, ListenEvents, Ev>,
@@ -107,5 +114,23 @@ export const newEventBus = <
 				ListenEvents,
 				Ev
 			>[],
+    /**
+     * Adds a one-time `listener` function as an event listener for `ev`.
+     *
+     * @param ev Name of the event
+     * @param listener Callback function
+     */
+    once: <Ev extends ReservedOrUserEventNames<ReservedEvents, ListenEvents>>(
+        ev: Ev,
+        fn: ReservedOrUserListener<ReservedEvents, ListenEvents, Ev>
+    ) => {
+			const wrapper = ((...args: any[]) => {
+        bus.off(ev, wrapper)
+        fn(...args)
+      }) as ReservedOrUserListener<ReservedEvents, ListenEvents, Ev>
+      (wrapper).fn = fn
+      bus.on(ev, wrapper)
+		}
 	};
+	return bus;
 };
