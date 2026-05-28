@@ -1,5 +1,11 @@
 # siokit-core
 
+## 0.1.4
+
+### Patch Changes
+
+- [`f3a60c6`](https://github.com/Nahida-aa/siokit/commit/f3a60c68ac7b6e0f580d3b6cb23fab8cf0ad00de) Thanks [@Nahida-aa](https://github.com/Nahida-aa)! - Patch release: small fixes and packaging metadata.
+
 ## 0.1.3
 
 ## 0.1.2
