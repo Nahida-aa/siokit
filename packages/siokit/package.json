@@ -43,8 +43,8 @@
     "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
-    "siokit-core": "workspace:*",
-    "siokit-parser": "workspace:*"
+    "siokit-core": "^0.1.0",
+    "siokit-parser": "^0.1.0"
   },
   "devDependencies": {
     "@typescript/native-preview": "latest",

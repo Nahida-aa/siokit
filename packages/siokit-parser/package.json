@@ -40,6 +40,6 @@
     "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
-    "siokit-core": "workspace:*"
+    "siokit-core": "^0.1.0"
   }
 }
