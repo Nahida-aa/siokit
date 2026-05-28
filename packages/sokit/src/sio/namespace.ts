@@ -4,36 +4,9 @@ import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
 import type { Socket } from './socket.ts'
 
-export type NamespaceReservedEvents<SocketT> = {
+type NsReservedEvents<SocketT> = {
   connection: (socket: SocketT) => void
   connect: (socket: SocketT) => void
-}
-
-export interface Namespace<
-  ListenEvents extends EventsMap = DefaultEventsMap,
-  EmitEvents extends EventsMap = ListenEvents,
-  ServerSideEvents extends EventsMap = DefaultEventsMap,
-  SocketData = any,
-> {
-  name: string
-  sockets: Map<string, Socket<ListenEvents, EmitEvents>>
-  middlewares: Array<(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void>
-
-  use(fn: (socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void): Namespace<ListenEvents, EmitEvents>
-
-  on<Ev extends ReservedOrUserEventNames<NamespaceReservedEvents<Socket<ListenEvents, EmitEvents>>, {}>>(
-    event: Ev,
-    fn: ReservedOrUserListener<NamespaceReservedEvents<Socket<ListenEvents, EmitEvents>>, {}, Ev>,
-  ): Namespace<ListenEvents, EmitEvents>
-
-  off(event?: string, fn?: (...args: any[]) => void): Namespace<ListenEvents, EmitEvents>
-  once(event: string, fn: (...args: any[]) => void): Namespace<ListenEvents, EmitEvents>
-  listeners(event: string): ((...args: any[]) => void)[]
-
-  _addSocket(socket: Socket<ListenEvents, EmitEvents>): void
-  _removeSocket(socket: Socket<ListenEvents, EmitEvents>): void
-  _broadcast(event: string, args: any[], from: Socket<ListenEvents, EmitEvents>, room?: string): void
-  _runMiddleware(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void): void
 }
 
 export const createNamespace = <
@@ -41,22 +14,22 @@ export const createNamespace = <
   EmitEvents extends EventsMap = ListenEvents,
   ServerSideEvents extends EventsMap = DefaultEventsMap,
   SocketData = any,
->(name: string): Namespace<ListenEvents, EmitEvents> => {
-  const emitter = newEventBus<{}, {}, NamespaceReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>>()
-  const sockets = new Map<string, Socket<ListenEvents, EmitEvents>>()
-  const middlewares: Array<(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void> = []
+>(name: string) => {
+  const emitter = newEventBus<{}, {}, NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>>()
+  const sockets = new Map<string, Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
+  const middlewares: Array<(socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void> = []
 
-  const _addSocket = (socket: Socket<ListenEvents, EmitEvents>) => {
+  const _addSocket = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => {
     sockets.set(socket.id, socket)
     emitter.emitReserved('connection', socket)
     emitter.emitReserved('connect', socket)
   }
 
-  const _removeSocket = (socket: Socket<ListenEvents, EmitEvents>) => {
+  const _removeSocket = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => {
     sockets.delete(socket.id)
   }
 
-  const _broadcast = (event: string, args: any[], from: Socket<ListenEvents, EmitEvents>, room?: string) => {
+  const _broadcast = (event: string, args: any[], from: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, room?: string) => {
     for (const [, sock] of sockets) {
       if (sock === from) continue
       if (room && !sock.rooms.has(room)) continue
@@ -65,7 +38,7 @@ export const createNamespace = <
     }
   }
 
-  const _runMiddleware = (socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => {
+  const _runMiddleware = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => {
     let i = 0
     const run = (err?: Error) => {
       if (err) return next(err)
@@ -80,17 +53,35 @@ export const createNamespace = <
     run()
   }
 
-  const nsp: Namespace<ListenEvents, EmitEvents> = {
+  const nsp = {
     name,
     sockets,
     middlewares,
 
-    on: (event: any, fn: any) => { emitter.on(event, fn); return nsp },
-    off: (event?: any, fn?: any) => { if (event !== undefined) emitter.off(event, fn); return nsp },
-    once: (event: any, fn: any) => { emitter.once(event, fn); return nsp },
-    listeners: (event: any) => emitter.listeners(event),
-    use: (fn) => { middlewares.push(fn); return nsp },
+    on: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
+      event: Ev,
+      fn: ReservedOrUserListener<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}, Ev>,
+    ) => { emitter.on(event, fn as any); return nsp },
 
+    off: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
+      event?: Ev,
+      fn?: ReservedOrUserListener<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}, Ev>,
+    ) => { if (event !== undefined) emitter.off(event, fn as any); return nsp },
+
+    once: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
+      event: Ev,
+      fn: ReservedOrUserListener<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}, Ev>,
+    ) => { emitter.once(event, fn as any); return nsp },
+
+    listeners: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
+      event: Ev,
+    ) => emitter.listeners(event),
+
+    use: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void) => {
+      middlewares.push(fn)
+      return nsp
+    },
+    // emit: 
     _addSocket,
     _removeSocket,
     _broadcast,
@@ -99,3 +90,10 @@ export const createNamespace = <
 
   return nsp
 }
+
+export type Namespace<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+> = ReturnType<typeof createNamespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>

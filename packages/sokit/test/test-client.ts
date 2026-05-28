@@ -4,7 +4,9 @@ const socket = ioc('http://localhost:4000', {
   transports: ['websocket'],
   forceNew: true,
 })
-
+socket.onAny((event, ...args) => {
+  console.log(event, args); // 这里可以看到所有事件和数据，方便调试
+});
 socket.on('connect', () => {
   console.log('[client] connected! id:', socket.id)
 

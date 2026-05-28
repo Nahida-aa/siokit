@@ -61,7 +61,7 @@ export const createEioSocket = (
   const sendRaw = (encoded: string | Uint8Array) => {
     if (closed) return
     try {
-      ws.send(encoded as any)
+      ws.send(encoded)
     } catch {}
   }
 

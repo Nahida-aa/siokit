@@ -1,6 +1,11 @@
 import { createServer } from 'sokit'
 
-const app = createServer({
+const app = createServer<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>({
   pingInterval: 25000,
   pingTimeout: 20000,
 })
@@ -10,25 +15,30 @@ app.use((socket, next) => {
   next()
 })
 
-app.on('connection', (socket) => {
+app.onConnection((socket) => {
   console.log(`[connect] ${socket.id}`)
 
-  socket.on('message', (data) => {
+  socket.on('message',async (data) => {
     console.log(`[message] ${socket.id}:`, data)
     socket.emit('reply', { received: true })
+    
+    socket.emit('withAck', 'Are you there?', (response) => {
+      console.log(`[withAck] ${socket.id}:`, response)
+    })
+    const res = await socket.emitWithAck('withAck', 'Are you there?')
   })
 
   socket.on('disconnect', () => {
     console.log(`[disconnect] ${socket.id}`)
   })
 })
-app.emit('wel', { id: 'test-socket-id' })
 
-const chat = app.of('/chat')
+const chat = app.of('/admin')
 chat.on('connection', (socket) => {
   socket.on('msg', (text: string) => {
-    console.log(`[chat] ${socket.id}: ${text}`)
-    app.of('/chat')._broadcast('msg', [text], socket)
+    console.log(`[admin] ${socket.id}: ${text}`)
+    app.of('/admin')._broadcast('msg', [text], socket)
   })
 })
 
+export default app

@@ -3,6 +3,7 @@ import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUs
 import type { EioSocket } from '../eio/server.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
+import { AllButLast, EventNamesWithAck, FirstNonErrorArg, Last } from './type.ts';
 
 type SocketReservedEvents = {
   disconnect: (reason: string) => void
@@ -82,6 +83,7 @@ export const createSocket = <
     get connected() { return connected },
     get recovered() { return false },
     rooms,
+    _eio: eio,
 
     on: <Ev extends ReservedOrUserEventNames<SocketReservedEvents, ListenEvents>>(
       event: Ev,
@@ -94,7 +96,7 @@ export const createSocket = <
       return sock
     },
 
-    emitWithAck: <Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>) => {
+    emitWithAck: <Ev extends EventNamesWithAck<EmitEvents>>(event: Ev, ...args: AllButLast<EventParams<EmitEvents, Ev>>): Promise<FirstNonErrorArg<Last<EventParams<EmitEvents, Ev>>>> => {
       return new Promise((resolve) => {
         const id = ++ackIdCounter
         const data = [event, ...args]

@@ -1,4 +1,4 @@
-import { createServer } from './packages/sokit/src/sio/server.ts'
+import { createServer } from '../src/sio/server.ts'
 
 const app = createServer()
 
@@ -32,14 +32,13 @@ if (typeof Bun !== 'undefined') {
   Bun.serve({
     port: 4000,
     fetch(req, server) {
-      if (server.upgrade(req)) return
+      if (server.upgrade(req)) {
+        console.log('WebSocket connection established')
+        return
+      }
       return new Response('Not Found', { status: 404 })
     },
-    websocket: {
-      open: (ws: any) => app.handleConnection(ws),
-      message: (ws: any, msg: any) => app.handleMessage(ws, msg),
-      close: (ws: any) => app.handleClose(ws),
-    },
+    websocket: app.websocket,
   })
   console.log('Server running on port 4000')
 } else {

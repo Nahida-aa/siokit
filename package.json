@@ -1,7 +1,10 @@
 {
   "name": "sokit-root",
-    "workspaces": [
+  "workspaces": [
     "packages/*",
     "examples/*"
-  ]
+  ],
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
 }

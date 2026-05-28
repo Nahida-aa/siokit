@@ -9,6 +9,9 @@ import { createNamespace } from './namespace.ts'
 import type { Namespace } from './namespace.ts'
 import { createSocket } from './socket.ts'
 import type { Socket } from './socket.ts'
+import type { CorsOptions, CorsOptionsDelegate } from "cors";
+import { Packet, RawData } from '../eio/parser/shared.ts';
+import { TransportName } from '../eio/transports/index.ts';
 
 type ServerReservedEvents<
   ListenEvents extends EventsMap = DefaultEventsMap,
@@ -20,19 +23,83 @@ type ServerReservedEvents<
   disconnect: (socket: any) => void
 }
 
-export type ServerOptions = {
-  pingInterval?: number
-  pingTimeout?: number
-  maxPayload?: number
+export interface ServerOptions {
+  /**
+   * how many ms without a pong packet to consider the connection closed
+   * @default 20000
+   */
+  pingTimeout?: number;
+  /**
+   * how many ms before sending a new ping packet
+   * @default 25000
+   */
+  pingInterval?: number;
+  /**
+   * how many ms before an uncompleted transport upgrade is cancelled
+   * @default 10000
+   */
+  upgradeTimeout?: number;
+    /**
+   * how many bytes or characters a message can be, before closing the session (to avoid DoS).
+   * @default 1e5 (1000 KB)
+   */
+  maxHttpBufferSize?: number;
+    /**
+   * The low-level transports that are enabled. WebTransport is disabled by default and must be manually enabled:
+   *
+   * @example
+   * new Server({
+   *   transports: ["polling", "websocket", "webtransport"]
+   * });
+   *
+   * @default ["polling", "websocket"]
+   */
+  transports?: TransportName[];
+  /**
+   * whether to allow transport upgrades
+   * @default true
+   */
+  allowUpgrades?: boolean;
+  /**
+   * parameters of the WebSocket permessage-deflate extension (see ws module api docs). Set to false to disable.
+   * @default false
+   */
+  perMessageDeflate?: boolean
+    /**
+   * an optional packet which will be concatenated to the handshake packet emitted by Engine.IO.
+   */
+  initialPacket?: any;
+    /**
+   * the options that will be forwarded to the cors module
+   */
+  cors?: CorsOptions | CorsOptionsDelegate;
+    /**
+   * parameters of the http compression for the polling transports (see zlib api docs). Set to false to disable.
+   * @default true
+   */
+  httpCompression?: boolean | object;
 }
+export const serverOptions = (opts?:ServerOptions) => ({
+  pingTimeout: opts?.pingTimeout ?? 20000,
+  pingInterval: opts?.pingInterval ?? 25000,
+  upgradeTimeout: opts?.upgradeTimeout ?? 10000, 
+  maxHttpBufferSize: opts?.maxHttpBufferSize ?? 1e6, // 1000000
+  transports: opts?.transports ?? ["polling", "websocket"],
+  allowUpgrades: true,
+  httpCompression: {
+    threshold: 1024,
+  },
+} satisfies ServerOptions)
+
 
 export const createServer = <
   ListenEvents extends EventsMap = DefaultEventsMap,
   EmitEvents extends EventsMap = ListenEvents,
   ServerSideEvents extends EventsMap = DefaultEventsMap,
   SocketData = any,
->(opts?: ServerOptions) => {
-  const emitter = newEventBus<ListenEvents, EmitEvents, ServerReservedEvents>()
+>(_opts?: ServerOptions) => {
+  const opts: ServerOptions = serverOptions(_opts)
+  const emitter = newEventBus<ListenEvents, EmitEvents, ServerReservedEvents<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
   const namespaces = new Map<string, Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
   const defaultNsp = createNamespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>('/')
   namespaces.set('/', defaultNsp)
@@ -88,11 +155,11 @@ export const createServer = <
     } catch {}
   }
 
-  const handleConnection = (ws: object) => {
-    const eio = createEioSocket(ws as unknown as WsRaw, {
+  const handleConnection = (ws: WsRaw) => {
+    const eio = createEioSocket(ws as WsRaw, {
       pingInterval: opts?.pingInterval,
       pingTimeout: opts?.pingTimeout,
-      maxPayload: opts?.maxPayload,
+      maxPayload: opts?.maxHttpBufferSize,
     })
 
     ;(eio as any)._ws = ws
@@ -100,7 +167,7 @@ export const createServer = <
     eio.sendOpen()
     eio.startPingTimers()
 
-    const onMessage = (packet: any) => {
+    const onMessage = (packet: Packet) => {
       if (packet.type === 'message' && typeof packet.data === 'string') {
         handleSioMessage(eio, packet.data)
       }
@@ -122,7 +189,7 @@ export const createServer = <
     eio.on('close', onClose)
   }
 
-  const handleMessage = (ws: object, data: any) => {
+  const handleMessage = (ws: object, data: RawData) => {
     const eio = wsToEio.get(ws)
     if (eio) eio.handleData(data)
   }
@@ -134,7 +201,9 @@ export const createServer = <
 
   const app = {
     ...emitter,
-
+    onConnection: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => void) => {
+      emitter.on('connection', fn)
+    },
     of: (name: string): Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData> => getNsp(name),
 
     use: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void) => {
@@ -148,6 +217,13 @@ export const createServer = <
     handleConnection,
     handleMessage,
     handleClose,
+    websocket: {
+      open: handleConnection,
+      message: handleMessage,
+      close: handleClose,
+      maxPayloadLength: opts.maxHttpBufferSize,
+      perMessageDeflate: opts.perMessageDeflate,
+    }
   }
 
   return app
