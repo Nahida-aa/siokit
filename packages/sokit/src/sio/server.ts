@@ -1,9 +1,10 @@
 import { newEventBus } from '../core/eventBus.ts'
-import type { DefaultEventsMap, EventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/eventBus.ts'
+import type { DefaultEventsMap, EventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
 import { createEioSocket } from '../eio/server.ts'
 import type { EioSocket } from '../eio/server.ts'
 import type { WsRaw } from '../eio/transports/websocket.ts'
 import { decodeSioPacket, PacketType } from './parser/index.ts'
+import { replacePlaceholders } from './parser/binary.ts'
 import type { SioPacket } from './parser/index.ts'
 import { createNamespace } from './namespace.ts'
 import type { Namespace } from './namespace.ts'
@@ -106,6 +107,7 @@ export const createServer = <
 
   const wsToEio = new WeakMap<object, EioSocket>()
   const sioSockets = new Map<string, Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
+  const pendingBinaries = new Map<EioSocket, { packet: SioPacket; buffers: Uint8Array[] }>()
 
   const getNsp = (name: string): Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData> => {
     let nsp = namespaces.get(name)
@@ -116,42 +118,54 @@ export const createServer = <
     return nsp
   }
 
+  const processSioPacket = (eio: EioSocket, sioPacket: SioPacket) => {
+    const nspName = sioPacket.nsp || '/'
+    const nsp = getNsp(nspName)
+
+    if (sioPacket.type === PacketType.CONNECT) {
+      const sessionId = generateSioId()
+      const sock = createSocket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>(eio, nsp, sessionId)
+      sioSockets.set(sessionId, sock)
+
+      nsp._runMiddleware(sock, (err?: Error) => {
+        if (err) {
+          sock._send({
+            type: PacketType.CONNECT_ERROR,
+            data: { message: err.message },
+            nsp: nspName,
+          })
+          return
+        }
+        sock._send({
+          type: PacketType.CONNECT,
+          data: { sid: sessionId },
+          nsp: nspName,
+        })
+        nsp._addSocket(sock)
+        emitter.emitReserved('connection', sock)
+      })
+    } else {
+      for (const [, sock] of sioSockets) {
+        if ((sock as any)._eio === eio) {
+          sock._handlePacket(sioPacket)
+          break
+        }
+      }
+    }
+  }
+
   const handleSioMessage = (eio: EioSocket, raw: string) => {
     try {
       const sioPacket = decodeSioPacket(raw)
-      const nspName = sioPacket.nsp || '/'
-      const nsp = getNsp(nspName)
 
-      if (sioPacket.type === PacketType.CONNECT) {
-        const sessionId = generateSioId()
-        const sock = createSocket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>(eio, nsp, sessionId)
-        sioSockets.set(sessionId, sock)
-
-        nsp._runMiddleware(sock, (err?: Error) => {
-          if (err) {
-            sock._send({
-              type: PacketType.CONNECT_ERROR,
-              data: { message: err.message },
-              nsp: nspName,
-            })
-            return
-          }
-          sock._send({
-            type: PacketType.CONNECT,
-            data: { sid: sessionId },
-            nsp: nspName,
-          })
-          nsp._addSocket(sock)
-          emitter.emitReserved('connection', sock)
-        })
-      } else {
-        for (const [, sock] of sioSockets) {
-          if ((sock as any)._eio === eio) {
-            sock._handlePacket(sioPacket)
-            break
-          }
+      if (sioPacket.type === PacketType.BINARY_EVENT || sioPacket.type === PacketType.BINARY_ACK) {
+        if (sioPacket.attachments && sioPacket.attachments > 0) {
+          pendingBinaries.set(eio, { packet: sioPacket, buffers: [] })
+          return
         }
       }
+
+      processSioPacket(eio, sioPacket)
     } catch {}
   }
 
@@ -168,12 +182,29 @@ export const createServer = <
     eio.startPingTimers()
 
     const onMessage = (packet: Packet) => {
-      if (packet.type === 'message' && typeof packet.data === 'string') {
+      if (packet.type !== 'message') return
+
+      if (packet.data instanceof Uint8Array || packet.data instanceof ArrayBuffer) {
+        const uint8 = packet.data instanceof Uint8Array ? packet.data : new Uint8Array(packet.data as ArrayBuffer)
+        const pending = pendingBinaries.get(eio)
+        if (pending) {
+          pending.buffers.push(uint8)
+          if (pending.buffers.length === pending.packet.attachments) {
+            pending.packet.data = replacePlaceholders(pending.packet.data, pending.buffers)
+            pendingBinaries.delete(eio)
+            processSioPacket(eio, pending.packet)
+          }
+        }
+        return
+      }
+
+      if (typeof packet.data === 'string') {
         handleSioMessage(eio, packet.data)
       }
     }
 
     const onClose = () => {
+      pendingBinaries.delete(eio)
       for (const [sid, sock] of sioSockets) {
         if ((sock as any)._eio === eio) {
           sock._disconnect('transport close')

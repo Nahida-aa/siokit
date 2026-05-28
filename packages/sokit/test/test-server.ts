@@ -16,6 +16,28 @@ app.use((socket, next) => {
 app.on('connection', (socket) => {
   console.log(`[connect] ${socket.id}`)
 
+  socket.emit('noArg')
+
+  socket.emit('basicEmit', 1, 'two', new Uint8Array([3, 4, 5]))
+
+  socket.on('hello', () => {
+    console.log(`[hello] ${socket.id}`)
+  })
+
+  socket.on('message', (data) => {
+    console.log(`[message] ${socket.id}:`, data)
+    socket.emit('reply', { received: true })
+  })
+
+  socket.on('msg', (text) => {
+    console.log(`[msg] ${socket.id}: ${text}`)
+  })
+
+  socket.on('binaryEcho', (data) => {
+    console.log(`[binaryEcho] ${socket.id}:`, data)
+    socket.emit('echo', { hello: 'from binaryEcho' })
+  })
+
   socket.on('ping', (cb) => {
     if (typeof cb === 'function') cb('pong')
   })

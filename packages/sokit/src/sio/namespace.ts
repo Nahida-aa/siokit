@@ -1,5 +1,5 @@
 import { newEventBus } from '../core/eventBus.ts'
-import type { EventsMap, DefaultEventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/eventBus.ts'
+import type { EventsMap, DefaultEventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
 import type { Socket } from './socket.ts'

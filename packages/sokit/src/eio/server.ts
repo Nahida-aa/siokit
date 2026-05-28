@@ -13,6 +13,7 @@ export interface EioSocket {
   closed: boolean
   sendOpen: () => void
   sendMessage: (payload: string) => void
+  sendBinary: (payload:  Uint8Array) => void
   startPingTimers: () => void
   scheduleNextPing: () => void
   handleData: (raw: any) => void
@@ -58,7 +59,7 @@ export const createEioSocket = (
     maxPayload: opts?.maxPayload ?? 1000000,
   }
 
-  const sendRaw = (encoded: string | Uint8Array) => {
+  const sendRaw = (encoded: string |  Uint8Array) => {
     if (closed) return
     try {
       ws.send(encoded)
@@ -115,6 +116,13 @@ export const createEioSocket = (
 
   const handleData = (raw: any) => {
     if (closed) return
+
+    if (raw instanceof Uint8Array || raw instanceof ArrayBuffer) {
+      const uint8 = raw instanceof Uint8Array ? raw : new Uint8Array(raw)
+      emitter.emitReserved('message', { type: 'message', data: uint8 as Uint8Array<ArrayBuffer> })
+      return
+    }
+
     const str = toStr(raw)
     const type = str.charAt(0)
 
@@ -139,11 +147,16 @@ export const createEioSocket = (
     sendRaw('4' + payload)
   }
 
+  const sendBinary = (payload:  Uint8Array) => {
+    sendRaw(payload)
+  }
+
   const eio: EioSocket = {
     ...emitter,
     id: hb.sid,
     sendOpen,
     sendMessage,
+    sendBinary,
     startPingTimers,
     scheduleNextPing,
     handleData,

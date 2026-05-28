@@ -1,3 +1,4 @@
+import { RawData } from "../parser/shared";
 
 export type SendOptions = {
   compress?: boolean
@@ -9,7 +10,7 @@ export enum WSReadyState {
   CLOSED,
 }
 export interface WsRaw {
-  send(data: string | ArrayBuffer | Uint8Array, options?: SendOptions): void
+  send(data: RawData, options?: SendOptions): void
   close(code?: number, reason?: string): void
   readyState: WSReadyState
   url?: string | URL | null

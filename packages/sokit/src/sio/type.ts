@@ -1,4 +1,4 @@
-import { EventNames, EventsMap } from "../core/eventBus";
+import { EventNames, EventsMap } from "../core/event";
 
 /**
  * Returns a boolean for whether the given type is `any`.

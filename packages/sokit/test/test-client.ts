@@ -4,19 +4,38 @@ const socket = ioc('http://localhost:4000', {
   transports: ['websocket'],
   forceNew: true,
 })
+
 socket.onAny((event, ...args) => {
-  console.log(event, args); // 这里可以看到所有事件和数据，方便调试
-});
+  console.log(`[onAny] ${event}`, args)
+})
+
 socket.on('connect', () => {
   console.log('[client] connected! id:', socket.id)
 
-  // Test emit with ack
+  socket.emit('hello')
+  socket.emit('message', 'hello from client')
+  socket.emit('msg', 'chat message')
   socket.emit('ping', (resp: any) => {
     console.log('[client] ping response:', resp)
   })
-
-  // Test echo
   socket.emit('echo', { hello: 'world' })
+  socket.emit('binaryEcho', new Uint8Array([10, 20, 30]))
+})
+
+socket.on('noArg', () => {
+  console.log('[client] noArg received')
+})
+
+socket.on('basicEmit', (a: number, b: string, c: Uint8Array) => {
+  console.log('[client] basicEmit received:', { a, b, c: Array.from(c) })
+})
+
+socket.on('reply', (data: { received: boolean }) => {
+  console.log('[client] reply received:', data)
+})
+
+socket.on('msg', (data: string[]) => {
+  console.log('[client] msg received:', data)
 })
 
 socket.on('echo', (data: any) => {

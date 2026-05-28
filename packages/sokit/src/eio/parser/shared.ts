@@ -52,7 +52,7 @@ export type PacketType =
   | "noop"
   | "error";
 
-export type RawData = string  | ArrayBuffer | Uint8Array<ArrayBuffer>
+export type RawData = string  | ArrayBuffer | Uint8Array
 // Uint8Array、DataView 等都属于 ArrayBufferView。而在 Node.js 环境中，Buffer 也继承自 Uint8Array，因此它会自动命中 ArrayBufferView，无需显式写出 Buffer
 
 export interface Packet {

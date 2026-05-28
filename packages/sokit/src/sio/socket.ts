@@ -1,7 +1,8 @@
 import { newEventBus } from '../core/eventBus.ts'
-import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/eventBus.ts'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
 import type { EioSocket } from '../eio/server.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
+import { encodeSioPacketBinary, hasBinary } from './parser/binary.ts'
 import type { SioPacket } from './parser/index.ts'
 import { AllButLast, EventNamesWithAck, FirstNonErrorArg, Last } from './type.ts';
 
@@ -28,6 +29,18 @@ export const createSocket = <
 
   const _send = (packet: SioPacket) => {
     if (!connected) return
+
+    if (hasBinary(packet.data)) {
+      const result = encodeSioPacketBinary(packet)
+      if (result) {
+        eio.sendMessage(result.text)
+        for (const bin of result.attachments) {
+          eio.sendBinary(bin)
+        }
+        return
+      }
+    }
+
     const encoded = encodeSioPacket(packet)
     eio.sendMessage(encoded)
   }
