@@ -1,17 +1,19 @@
 import { describe, it, expect } from 'bun:test'
 import { newEventBus } from '../../src/core/eventBus.ts'
 
+type Empty = { [key: string]: (...args: any[]) => void }
+
 describe('newEventBus', () => {
   it('on + emit fires handlers', () => {
-    const bus = newEventBus<{ foo: (x: number) => void }, {}, {}>()
-    let called = 0
+    const bus = newEventBus<{ foo: (x: number) => void }, Empty, Empty>()
+    let called: number = 0
     bus.on('foo', (x) => { called = x })
     bus.emit('foo', 42)
     expect(called).toBe(42)
   })
 
   it('multiple handlers for same event', () => {
-    const bus = newEventBus<{ foo: (x: number) => void }, {}, {}>()
+    const bus = newEventBus<{ foo: (x: number) => void }, Empty, Empty>()
     const results: number[] = []
     bus.on('foo', (x) => results.push(x * 2))
     bus.on('foo', (x) => results.push(x * 3))
@@ -20,7 +22,7 @@ describe('newEventBus', () => {
   })
 
   it('off removes specific handler', () => {
-    const bus = newEventBus<{ foo: () => void }, {}, {}>()
+    const bus = newEventBus<{ foo: () => void }, Empty, Empty>()
     let count = 0
     const fn = () => { count++ }
     bus.on('foo', fn)
@@ -32,7 +34,7 @@ describe('newEventBus', () => {
   })
 
   it('off without fn removes all handlers', () => {
-    const bus = newEventBus<{ foo: () => void }, {}, {}>()
+    const bus = newEventBus<{ foo: () => void }, Empty, Empty>()
     let a = 0; let b = 0
     bus.on('foo', () => { a++ })
     bus.on('foo', () => { b++ })
@@ -43,7 +45,7 @@ describe('newEventBus', () => {
   })
 
   it('emitReserved for reserved events', () => {
-    const bus = newEventBus<{}, {}, { reserved: (s: string) => void }>()
+    const bus = newEventBus<Empty, Empty, { reserved: (s: string) => void }>()
     let val = ''
     bus.on('reserved', (s) => { val = s })
     bus.emitReserved('reserved', 'hello')
@@ -51,7 +53,7 @@ describe('newEventBus', () => {
   })
 
   it('once fires only once', () => {
-    const bus = newEventBus<{ foo: () => void }, {}, {}>()
+    const bus = newEventBus<{ foo: () => void }, Empty, Empty>()
     let count = 0
     bus.once('foo', () => { count++ })
     bus.emit('foo')
@@ -60,7 +62,7 @@ describe('newEventBus', () => {
   })
 
   it('listeners returns registered handlers', () => {
-    const bus = newEventBus<{ foo: () => void }, {}, {}>()
+    const bus = newEventBus<{ foo: () => void }, Empty, Empty>()
     const fn = () => {}
     expect(bus.listeners('foo')).toEqual([])
     bus.on('foo', fn)
@@ -68,7 +70,7 @@ describe('newEventBus', () => {
   })
 
   it('emit with no handlers does not throw', () => {
-    const bus = newEventBus<{ foo: () => void }, {}, {}>()
+    const bus = newEventBus<{ foo: () => void }, Empty, Empty>()
     expect(() => bus.emit('foo')).not.toThrow()
   })
 })

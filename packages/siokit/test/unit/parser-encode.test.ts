@@ -40,7 +40,7 @@ describe('encodeSioPacket', () => {
 
   it('BINARY_ACK', () => {
     const result = encodeSioPacket({ type: PacketType.BINARY_ACK, id: 3, attachments: 1, data: [{ _placeholder: true, num: 0 }] })
-    expect(result).toBe('63-3[{"_placeholder":true,"num":0}]')
+    expect(result).toBe('61-3[{"_placeholder":true,"num":0}]')
   })
 
   it('CONNECT_ERROR', () => {

@@ -1,4 +1,4 @@
-import { createServer } from 'sokit'
+import { createServer } from 'siokit'
 
 const app = createServer<
   ClientToServerEvents,
@@ -37,7 +37,7 @@ const chat = app.of('/admin')
 chat.on('connection', (socket) => {
   socket.on('msg', (text: string) => {
     console.log(`[admin] ${socket.id}: ${text}`)
-    app.of('/admin')._broadcast('msg', [text], socket)
+    app.of('/admin').emit('msg', [text])
   })
 })
 

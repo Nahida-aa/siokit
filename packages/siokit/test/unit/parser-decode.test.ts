@@ -52,9 +52,9 @@ describe('decodeSioPacket', () => {
   })
 
   it('BINARY_ACK with id', () => {
-    const p = decodeSioPacket('63-3[{"_placeholder":true,"num":0}]')
+    const p = decodeSioPacket('61-3[{"_placeholder":true,"num":0}]')
     expect(p.type).toBe(PacketType.BINARY_ACK)
-    expect(p.attachments).toBe(3)
+    expect(p.attachments).toBe(1)
     expect(p.id).toBe(3)
   })
 
