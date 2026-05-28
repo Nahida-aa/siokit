@@ -72,7 +72,7 @@ const main = async () => {
   // Test 2: emitWithAck
   {
     const client = await connect()
-    const resp: string = await client.emitWithAck('ping')
+    const resp = await client.emitWithAck('ping')
     assert(resp === 'pong', 'client: emitWithAck')
     client.disconnect()
     await sleep(50)

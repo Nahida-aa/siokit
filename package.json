@@ -1,12 +1,22 @@
 {
   "name": "sokit-root",
+  "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*",
     "examples/*"
   ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "cd packages/siokit && bun run typecheck",
+    "changeset": "changeset",
+    "build": "cd packages/siokit-core && bun run build && cd ../siokit-parser && bun run build && cd ../siokit-client && bun run build && cd ../siokit && bun run build"
+  },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "rolldown": "^1.0.3",
-    "rolldown-plugin-dts": "^0.25.1",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "typescript": "^6.0.3"
   }
 }

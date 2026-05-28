@@ -1,5 +1,6 @@
 {
   "name": "api",
+  "private": true,
   "imports": {
     "#/*": "./src/*"
   },
@@ -8,7 +9,6 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
-    "@repo/shared": "workspace:*",
     "@socket.io/bun-engine": "^0.1.1",
     "@types/cors": "^2.8.19",
     "cors": "^2.8.6",

@@ -1,0 +1,11 @@
+.github
+packages
+examples
+node_modules
+test
+scripts
+*.tsbuildinfo
+rolldown.config.ts
+tsconfig.build.json
+tsconfig.json
+AGENTS.md

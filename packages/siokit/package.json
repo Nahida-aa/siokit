@@ -1,13 +1,46 @@
 {
   "name": "siokit",
+  "version": "0.0.2",
+  "description": "Socket.IO-compatible server & client library — Engine.IO polling/WebSocket, typed events, binary, namespaces",
+  "keywords": [
+    "socket.io",
+    "engine.io",
+    "websocket",
+    "polling",
+    "real-time",
+    "server",
+    "typescript"
+  ],
+  "license": "MIT",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
+    "build": "rolldown -c && tsc -p tsconfig.build.json && find dist -name '*.d.ts' -exec sed -i \"s/\\.ts'/\\.js'/g\" {} +",
     "typecheck": "tsgo --noEmit",
     "test": "bun test",
-    "prepublishOnly": "cp ../../README.md . && cp ../../LICENSE ."
+    "prepublishOnly": "npm run build && cp ../../README.md . 2>/dev/null; cp ../../LICENSE . 2>/dev/null"
   },
   "exports": {
     ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
     "siokit-core": "workspace:*",
