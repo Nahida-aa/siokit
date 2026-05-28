@@ -1,0 +1,6 @@
+{
+  "name": "sokit",
+  "scripts": {
+    "typecheck": "tsgo --noEmit"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@socket.io/bun-engine": "^0.1.1",
+    "@repo/shared": "workspace:*",
+    "@types/cors": "^2.8.19",
+    "cors": "^2.8.6",
+    "hono": "^4.12.23",
+    "onnxruntime-node": "^1.26.0",
+    "socket.io": "^4.8.3",
+    "socket.io-parser": "^4.2.6",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

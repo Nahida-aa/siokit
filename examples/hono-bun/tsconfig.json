@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "types": ["bun"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "#/*": ["./src/*"]
+    }
+  }
+}

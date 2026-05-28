@@ -1,0 +1,7 @@
+{
+  "name": "sokit-root",
+    "workspaces": [
+    "packages/*",
+    "examples/*"
+  ]
+}
