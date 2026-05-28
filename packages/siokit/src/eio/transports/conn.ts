@@ -1,5 +1,5 @@
-import { newEventBus } from '@repo/siokit-core'
-import { newDecoder } from '@repo/siokit-parser'
+import { newEventBus } from 'siokit-core'
+import { newDecoder } from 'siokit-parser'
 import { PACKET_TYPES, PacketType, PacketTypes, type Packet } from '../parser/shared.ts'
 import type { HandshakeData } from '../type.ts'
 

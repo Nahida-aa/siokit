@@ -1,7 +1,7 @@
-import { newEventBus } from '@repo/siokit-core'
-import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener, EventNamesWithAck, Last, FirstNonErrorArg, AllButLast } from '@repo/siokit-core'
-import { encodeSioPacket, encodeSioPacketBinary, PacketType, hasBinary, newDecoder } from '@repo/siokit-parser'
-import type { SioPacket } from '@repo/siokit-parser'
+import { newEventBus } from 'siokit-core'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener, EventNamesWithAck, Last, FirstNonErrorArg, AllButLast } from 'siokit-core'
+import { encodeSioPacket, encodeSioPacketBinary, PacketType, hasBinary, newDecoder } from 'siokit-parser'
+import type { SioPacket } from 'siokit-parser'
 import { createTransport } from './transport.ts'
 
 type ClientReservedEvents = {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test'
-import { hasBinary, extractBinaries, replacePlaceholders, encodeSioPacketBinary, reconstructPacket } from '@repo/siokit-parser'
-import { PacketType } from '@repo/siokit-parser'
-import type { SioPacket } from '@repo/siokit-parser'
+import { hasBinary, extractBinaries, replacePlaceholders, encodeSioPacketBinary, reconstructPacket } from 'siokit-parser'
+import { PacketType } from 'siokit-parser'
+import type { SioPacket } from 'siokit-parser'
 
 describe('hasBinary', () => {
   it('returns true for Uint8Array', () => {

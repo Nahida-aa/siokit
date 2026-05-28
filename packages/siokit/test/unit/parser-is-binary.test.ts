@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { isBinary, hasBinary } from '@repo/siokit-parser'
+import { isBinary, hasBinary } from 'siokit-parser'
 
 describe('isBinary', () => {
   it('returns true for Uint8Array', () => {

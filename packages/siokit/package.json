@@ -10,8 +10,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/siokit-core": "workspace:*",
-    "@repo/siokit-parser": "workspace:*"
+    "siokit-core": "workspace:*",
+    "siokit-parser": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",

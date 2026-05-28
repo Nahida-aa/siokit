@@ -1,12 +1,12 @@
 {
-  "name": "@repo/siokit-client",
+  "name": "siokit-client",
   "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/siokit-core": "workspace:*",
-    "@repo/siokit-parser": "workspace:*"
+    "siokit-core": "workspace:*",
+    "siokit-parser": "workspace:*"
   }
 }

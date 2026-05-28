@@ -1,7 +1,7 @@
-import { newEventBus } from '@repo/siokit-core'
-import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '@repo/siokit-core'
-import { encodeSioPacket, PacketType } from '@repo/siokit-parser'
-import type { SioPacket } from '@repo/siokit-parser'
+import { newEventBus } from 'siokit-core'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from 'siokit-core'
+import { encodeSioPacket, PacketType } from 'siokit-parser'
+import type { SioPacket } from 'siokit-parser'
 import type { Socket } from './socket.ts'
 
 type NsReservedEvents<SocketT> = {
