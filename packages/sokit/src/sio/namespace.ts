@@ -1,45 +1,62 @@
-import { createEmitter } from '../core/emitter.ts'
-import type { EventsMap } from '../core/eventBus.ts'
+import { newEventBus } from '../core/eventBus.ts'
+import type { EventsMap, DefaultEventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/eventBus.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
-import type { ServerSocket } from './socket.ts'
+import type { Socket } from './socket.ts'
 
-type NspReservedEvents = {
-  connection: (socket: ServerSocket) => void
-  connect: (socket: ServerSocket) => void
+export type NamespaceReservedEvents<SocketT> = {
+  connection: (socket: SocketT) => void
+  connect: (socket: SocketT) => void
 }
 
-export interface Namespace {
+export interface Namespace<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+> {
   name: string
-  sockets: Map<string, ServerSocket>
-  middlewares: Array<(socket: ServerSocket, next: (err?: Error) => void) => void>
-  use(fn: (socket: ServerSocket, next: (err?: Error) => void) => void): Namespace
-  on(event: string, handler: (...args: any[]) => void): Namespace
-  off(event?: string, handler?: (...args: any[]) => void): Namespace
-  once(event: string, handler: (...args: any[]) => void): Namespace
+  sockets: Map<string, Socket<ListenEvents, EmitEvents>>
+  middlewares: Array<(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void>
+
+  use(fn: (socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void): Namespace<ListenEvents, EmitEvents>
+
+  on<Ev extends ReservedOrUserEventNames<NamespaceReservedEvents<Socket<ListenEvents, EmitEvents>>, {}>>(
+    event: Ev,
+    fn: ReservedOrUserListener<NamespaceReservedEvents<Socket<ListenEvents, EmitEvents>>, {}, Ev>,
+  ): Namespace<ListenEvents, EmitEvents>
+
+  off(event?: string, fn?: (...args: any[]) => void): Namespace<ListenEvents, EmitEvents>
+  once(event: string, fn: (...args: any[]) => void): Namespace<ListenEvents, EmitEvents>
   listeners(event: string): ((...args: any[]) => void)[]
-  _addSocket(socket: ServerSocket): void
-  _removeSocket(socket: ServerSocket): void
-  _broadcast(event: string, args: any[], from: ServerSocket, room?: string): void
-  _runMiddleware(socket: ServerSocket, next: (err?: Error) => void): void
+
+  _addSocket(socket: Socket<ListenEvents, EmitEvents>): void
+  _removeSocket(socket: Socket<ListenEvents, EmitEvents>): void
+  _broadcast(event: string, args: any[], from: Socket<ListenEvents, EmitEvents>, room?: string): void
+  _runMiddleware(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void): void
 }
 
-export const createNamespace = (name: string): Namespace => {
-  const emitter = createEmitter<EventsMap, EventsMap, NspReservedEvents>()
-  const sockets = new Map<string, ServerSocket>()
-  const middlewares: Array<(socket: ServerSocket, next: (err?: Error) => void) => void> = []
+export const createNamespace = <
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+>(name: string): Namespace<ListenEvents, EmitEvents> => {
+  const emitter = newEventBus<{}, {}, NamespaceReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>>()
+  const sockets = new Map<string, Socket<ListenEvents, EmitEvents>>()
+  const middlewares: Array<(socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => void> = []
 
-  const _addSocket = (socket: ServerSocket) => {
+  const _addSocket = (socket: Socket<ListenEvents, EmitEvents>) => {
     sockets.set(socket.id, socket)
     emitter.emitReserved('connection', socket)
     emitter.emitReserved('connect', socket)
   }
 
-  const _removeSocket = (socket: ServerSocket) => {
+  const _removeSocket = (socket: Socket<ListenEvents, EmitEvents>) => {
     sockets.delete(socket.id)
   }
 
-  const _broadcast = (event: string, args: any[], from: ServerSocket, room?: string) => {
+  const _broadcast = (event: string, args: any[], from: Socket<ListenEvents, EmitEvents>, room?: string) => {
     for (const [, sock] of sockets) {
       if (sock === from) continue
       if (room && !sock.rooms.has(room)) continue
@@ -48,7 +65,7 @@ export const createNamespace = (name: string): Namespace => {
     }
   }
 
-  const _runMiddleware = (socket: ServerSocket, next: (err?: Error) => void) => {
+  const _runMiddleware = (socket: Socket<ListenEvents, EmitEvents>, next: (err?: Error) => void) => {
     let i = 0
     const run = (err?: Error) => {
       if (err) return next(err)
@@ -63,24 +80,17 @@ export const createNamespace = (name: string): Namespace => {
     run()
   }
 
-  const nsp: Namespace = {
+  const nsp: Namespace<ListenEvents, EmitEvents> = {
     name,
     sockets,
     middlewares,
-    on: (event: string, handler: (...args: any[]) => void) => {
-      emitter.on(event as any, handler as any)
-      return nsp
-    },
-    off: (event?: string, handler?: (...args: any[]) => void) => {
-      emitter.off(event as any, handler as any)
-      return nsp
-    },
-    once: (event: string, handler: (...args: any[]) => void) => {
-      emitter.once(event as any, handler as any)
-      return nsp
-    },
-    listeners: (event: string) => emitter.listeners(event as any),
+
+    on: (event: any, fn: any) => { emitter.on(event, fn); return nsp },
+    off: (event?: any, fn?: any) => { if (event !== undefined) emitter.off(event, fn); return nsp },
+    once: (event: any, fn: any) => { emitter.once(event, fn); return nsp },
+    listeners: (event: any) => emitter.listeners(event),
     use: (fn) => { middlewares.push(fn); return nsp },
+
     _addSocket,
     _removeSocket,
     _broadcast,

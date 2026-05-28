@@ -1,6 +1,6 @@
-import { createServer } from 'sokit'
+import { Server } from 'socket.io'
 
-const app = createServer({
+const app = new Server({
   pingInterval: 25000,
   pingTimeout: 20000,
 })
@@ -18,17 +18,18 @@ app.on('connection', (socket) => {
     socket.emit('reply', { received: true })
   })
 
+
+
   socket.on('disconnect', () => {
     console.log(`[disconnect] ${socket.id}`)
   })
 })
-app.emit('wel', { id: 'test-socket-id' })
 
 const chat = app.of('/chat')
 chat.on('connection', (socket) => {
   socket.on('msg', (text: string) => {
     console.log(`[chat] ${socket.id}: ${text}`)
-    app.of('/chat')._broadcast('msg', [text], socket)
+    app.of('/chat').emit('msg', [text], socket)
   })
 })
 

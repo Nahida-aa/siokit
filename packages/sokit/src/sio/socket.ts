@@ -1,5 +1,5 @@
-import { createEmitter } from '../core/emitter.ts'
-import type { EventsMap } from '../core/eventBus.ts'
+import { newEventBus } from '../core/eventBus.ts'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/eventBus.ts'
 import type { EioSocket } from '../eio/server.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
@@ -8,33 +8,17 @@ type SocketReservedEvents = {
   disconnect: (reason: string) => void
 }
 
-export interface ServerSocket {
-  id: string
-  connected: boolean
-  recovered: boolean
-  rooms: Set<string>
-  on(event: string, handler: (...args: any[]) => void): ServerSocket
-  once(event: string, handler: (...args: any[]) => void): ServerSocket
-  off(event?: string, handler?: (...args: any[]) => void): ServerSocket
-  emit(event: string, ...args: any[]): ServerSocket
-  emitWithAck(event: string, ...args: any[]): Promise<any>
-  join(...rooms: string[]): void
-  leave(room: string): void
-  disconnect(): void
-  to(room: string): { emit: (event: string, ...args: any[]) => ServerSocket }
-  listeners(event: string): ((...args: any[]) => void)[]
-  _handlePacket(packet: SioPacket): void
-  _disconnect(reason: string): void
-  _send(packet: SioPacket): void
-  [key: string]: any
-}
-
-export const createSocket = (
+export const createSocket = <
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+>(
   eio: EioSocket,
-  nsp: { name: string; _removeSocket: (s: ServerSocket) => void; _broadcast: (event: string, args: any[], from: ServerSocket, room?: string) => void },
+  nsp: { name: string; _removeSocket: (s: any) => void; _broadcast: (event: string, args: any[], from: any, room?: string) => void },
   sessionId: string,
-): ServerSocket => {
-  const emitter = createEmitter<EventsMap, EventsMap, SocketReservedEvents>()
+)=> {
+  const emitter = newEventBus<ListenEvents, EmitEvents, SocketReservedEvents>()
   let connected = true
   let ackIdCounter = 0
   const acks = new Map<number, (...args: any[]) => void>()
@@ -63,8 +47,8 @@ export const createSocket = (
         }
         if (args.length > 0) {
           const eventName = args[0]
-          const eventArgs = args.slice(1)
-          ;(emitter).emit(eventName, ...eventArgs)
+          const eventArgs: any[] = args.slice(1)
+          ;(emitter as any).emit(eventName, ...eventArgs)
         }
         break
       }
@@ -93,36 +77,25 @@ export const createSocket = (
     emitter.emitReserved('disconnect', reason)
   }
 
-  const sock: ServerSocket = {
-    _eio: eio,
+  const sock = {
     id: sessionId,
     get connected() { return connected },
     get recovered() { return false },
     rooms,
 
-    on: (event: string, handler: (...args: any[]) => void) => {
-      emitter.on(event as any, handler as any)
-      return sock
-    },
-    once: (event: string, handler: (...args: any[]) => void) => {
-      emitter.once(event as any, handler as any)
-      return sock
-    },
-    off: (event?: string, handler?: (...args: any[]) => void) => {
-      if (event) emitter.off(event as any, handler as any)
-      return sock
-    },
-    listeners: (event: string) => emitter.listeners(event as any),
+    on: <Ev extends ReservedOrUserEventNames<SocketReservedEvents, ListenEvents>>(
+      event: Ev,
+      fn: ReservedOrUserListener<SocketReservedEvents, ListenEvents, Ev>,
+    ) => { emitter.on(event, fn); return sock },
 
-    emit: (event: string, ...args: any[]) => {
+    emit: <Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>) => {
       const data = [event, ...args]
-      const packet: SioPacket = { type: PacketType.EVENT, data, nsp: nsp.name }
-      _send(packet)
+      _send({ type: PacketType.EVENT, data, nsp: nsp.name })
       return sock
     },
 
-    emitWithAck: (event: string, ...args: any[]) => {
-      return new Promise((resolve, reject) => {
+    emitWithAck: <Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>) => {
+      return new Promise((resolve) => {
         const id = ++ackIdCounter
         const data = [event, ...args]
         acks.set(id, (...resp: any[]) => resolve(resp.length <= 1 ? resp[0] : resp))
@@ -143,14 +116,6 @@ export const createSocket = (
       _disconnect('client disconnect')
     },
 
-    to: (room: string) => {
-      const broadcastFn = (event: string, ...args: any[]) => {
-        nsp._broadcast(event, args, sock, room)
-        return sock
-      }
-      return { emit: broadcastFn }
-    },
-
     _handlePacket,
     _disconnect,
     _send,
@@ -158,3 +123,10 @@ export const createSocket = (
 
   return sock
 }
+
+export type Socket<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+> = ReturnType<typeof createSocket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>

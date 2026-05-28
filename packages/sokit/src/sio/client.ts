@@ -1,4 +1,4 @@
-import { createEmitter } from '../core/emitter.ts'
+import { newEventBus } from '../core/eventBus.ts'
 import type { EventsMap } from '../core/eventBus.ts'
 import { encodeSioPacket, decodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
@@ -18,8 +18,13 @@ type ClientOptions = {
   timeout?: number
 }
 
-export const createClient = (url: string, opts?: ClientOptions) => {
-  const emitter = createEmitter<EventsMap, EventsMap, ClientReservedEvents>()
+export const createClient = <
+	ListenEvents extends EventsMap,
+	EmitEvents extends EventsMap,
+	ServerSideEvents extends EventsMap,
+	SocketData = any,
+>(url: string, opts?: ClientOptions) => {
+  const emitter = newEventBus<EventsMap, EventsMap, ClientReservedEvents>()
   let ws: WebSocket | null = null
   let connected = false
   let _id: string | undefined
@@ -84,7 +89,7 @@ export const createClient = (url: string, opts?: ClientOptions) => {
                   _send({ type: PacketType.ACK, id: sioPacket.id, data: respArgs })
                 })
               }
-              emitter.emit(eventName, ...eventArgs)
+              ;(emitter as any).emit(eventName, ...eventArgs)
               break
             }
             case PacketType.ACK:
@@ -176,3 +181,12 @@ export const createClient = (url: string, opts?: ClientOptions) => {
 
   return client
 }
+
+export type Client<
+	ListenEvents extends EventsMap,
+	EmitEvents extends EventsMap,
+	ServerSideEvents extends EventsMap,
+	SocketData = any,
+> = ReturnType<
+	typeof createClient<ListenEvents, EmitEvents, ServerSideEvents, SocketData>
+>;

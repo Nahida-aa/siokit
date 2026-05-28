@@ -1,6 +1,6 @@
-import { createEmitter } from '../core/emitter.ts'
-import type { HandshakeData } from './type.ts'
+import { newEventBus } from '../core/eventBus.ts'
 import type { Packet } from './parser/shared.ts'
+import type { HandshakeData } from './type.ts'
 import type { WsRaw } from './transports/websocket.ts'
 
 type EioReservedEvents = {
@@ -27,13 +27,16 @@ const genEioId = () => {
   return `eio_${Date.now().toString(36)}${Math.random().toString(36).substring(2, 8)}${eioIdCounter}`
 }
 
-const hasBuffer = typeof Buffer !== 'undefined'
 const toStr = (raw: any): string => {
   if (typeof raw === 'string') return raw
   if (raw instanceof ArrayBuffer) return new TextDecoder().decode(raw)
-  if (hasBuffer && raw?.constructor?.name === 'Buffer') return String(raw)
-  if (raw && typeof raw === 'object' && raw.type === 'Buffer') {
-    return new TextDecoder().decode(new Uint8Array(raw.data))
+  if (raw && typeof raw === 'object') {
+    if (raw.type === 'Buffer' && Array.isArray(raw.data)) {
+      return new TextDecoder().decode(new Uint8Array(raw.data))
+    }
+    if (raw.buffer instanceof ArrayBuffer || raw.byteLength !== undefined) {
+      try { return new TextDecoder().decode(raw) } catch {}
+    }
   }
   return String(raw)
 }
@@ -42,7 +45,7 @@ export const createEioSocket = (
   ws: WsRaw,
   opts?: { pingInterval?: number; pingTimeout?: number; maxPayload?: number },
 ): EioSocket => {
-  const emitter = createEmitter<{}, {}, EioReservedEvents>()
+  const emitter = newEventBus<{}, {}, EioReservedEvents>()
   let pingTimeoutTimer: ReturnType<typeof setTimeout> | null = null
   let pingIntervalTimer: ReturnType<typeof setTimeout> | null = null
   let closed = false
