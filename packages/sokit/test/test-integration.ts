@@ -39,7 +39,11 @@ const server = Bun.serve({
     if (srv.upgrade(req)) return
     return new Response('Not Found', { status: 404 })
   },
-  websocket: app.websocket,
+  websocket: {
+    open(ws: any) { ws.data = app.createWsSession(ws) },
+    message(ws: any, data) { ws.data.handleData(data) },
+    close(ws: any) { ws.data.close('transport close') },
+  },
 })
 
 const connect = (name: string): Promise<any> => new Promise((resolve) => {

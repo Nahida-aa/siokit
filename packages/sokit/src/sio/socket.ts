@@ -96,7 +96,7 @@ export const createSocket = <
     get connected() { return connected },
     get recovered() { return false },
     rooms,
-    _eio: eio,
+    _conn: eio,
 
     on: <Ev extends ReservedOrUserEventNames<SocketReservedEvents, ListenEvents>>(
       event: Ev,

@@ -1,5 +1,7 @@
 import { createServer } from '../src/index.ts'
+import { WsSession } from '../src/sio/server.ts';
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './types.ts';
+
 
 const app = createServer<
   ClientToServerEvents,
@@ -77,15 +79,22 @@ admin.on('connection', (socket) => {
 })
 
 console.log('Starting server on port 4000...')
-Bun.serve({
+Bun.serve<WsSession>({
   port: 4000,
   fetch(req, server) {
-    if (server.upgrade(req)) {
-      console.log('WebSocket connection established')
+    if (server.upgrade(req, {} as any)) {
       return
     }
-    return new Response('Not Found', { status: 404 })
+    return app.fetch(req)
   },
+  // websocket: {
+  //   open(ws) {
+  //     ws.data = app.createWsSession(ws)
+  //     console.log('WebSocket connection established')
+  //   },
+  //   message(ws, data) { (ws.data).handleData(data) },
+  //   close(ws) { (ws.data).close('transport close') },
+  // },
   websocket: app.websocket,
 })
 console.log('Server running on port 4000')

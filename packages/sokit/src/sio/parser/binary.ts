@@ -79,3 +79,36 @@ const encodeTextPacket = (packet: SioPacket): string => {
   }
   return str
 }
+
+export function reconstructPacket(packet: SioPacket, buffers: Array<Uint8Array | ArrayBuffer>) {
+  packet.data = _reconstructPacket(packet.data, buffers);
+  delete packet.attachments; // no longer useful
+  return packet;
+}
+function _reconstructPacket(data: any, buffers: Array<Uint8Array | ArrayBuffer>) {
+  if (!data) return data;
+
+  if (data && data._placeholder === true) {
+    const isIndexValid =
+      typeof data.num === "number" &&
+      data.num >= 0 &&
+      data.num < buffers.length;
+    if (isIndexValid) {
+      return buffers[data.num]; // appropriate buffer (should be natural order anyway)
+    } else {
+      throw new Error("illegal attachments");
+    }
+  } else if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      data[i] = _reconstructPacket(data[i], buffers);
+    }
+  } else if (typeof data === "object") {
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        data[key] = _reconstructPacket(data[key], buffers);
+      }
+    }
+  }
+
+  return data;
+}
