@@ -1,6 +1,6 @@
 {
   "name": "siokit",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Socket.IO-compatible server & client library — Engine.IO polling/WebSocket, typed events, binary, namespaces",
   "keywords": [
     "socket.io",
@@ -49,8 +49,8 @@
     "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
-    "siokit-core": "^0.1.2",
-    "siokit-parser": "^0.1.2"
+    "siokit-core": "^0.1.3",
+    "siokit-parser": "^0.1.3"
   },
   "devDependencies": {
     "@typescript/native-preview": "latest",
