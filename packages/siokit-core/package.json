@@ -1,6 +1,6 @@
 {
   "name": "siokit-core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Core types and event bus for siokit — the Socket.IO-compatible library",
   "keywords": [
     "socket.io",

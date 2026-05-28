@@ -1,5 +1,15 @@
 # siokit-client
 
+## 0.1.5
+
+### Patch Changes
+
+- [`d549cb7`](https://github.com/Nahida-aa/siokit/commit/d549cb75fd6d6510fd102a97bacdd1bd9d9c9c10) Thanks [@Nahida-aa](https://github.com/Nahida-aa)! - Patch release for recent code updates.
+
+- Updated dependencies [[`d549cb7`](https://github.com/Nahida-aa/siokit/commit/d549cb75fd6d6510fd102a97bacdd1bd9d9c9c10)]:
+  - siokit-core@0.1.5
+  - siokit-parser@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

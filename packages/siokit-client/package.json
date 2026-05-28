@@ -1,6 +1,6 @@
 {
   "name": "siokit-client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Socket.IO-compatible client — WebSocket transport with typed emit/on/emitWithAck and binary support",
   "keywords": [
     "socket.io",
@@ -46,7 +46,7 @@
     "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
-    "siokit-core": "^0.1.4",
-    "siokit-parser": "^0.1.4"
+    "siokit-core": "^0.1.5",
+    "siokit-parser": "^0.1.5"
   }
 }
