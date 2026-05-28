@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "rolldown -c && tsc -p tsconfig.build.json && find dist -name '*.d.ts' -exec sed -i \"s/\\.ts'/\\.js'/g\" {} +",
-    "prepublishOnly": "bun run build && cp ../../README.md . 2>/dev/null; cp ../../LICENSE . 2>/dev/null"
+    "prepublishOnly": "bun run build &&   cp ../../LICENSE . 2>/dev/null"
   },
   "exports": {
     ".": "./src/index.ts"

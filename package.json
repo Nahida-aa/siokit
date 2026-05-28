@@ -17,6 +17,7 @@
     "@changesets/cli": "^2.31.0",
     "rolldown": "^1.0.3",
     "socket.io-client": "^4.8.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "@typescript/native-preview": "latest"
   }
 }
