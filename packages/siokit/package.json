@@ -9,6 +9,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "@repo/siokit-core": "workspace:*",
+    "@repo/siokit-parser": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "^1.3.14",
     "socket.io-client": "^4.8.3",

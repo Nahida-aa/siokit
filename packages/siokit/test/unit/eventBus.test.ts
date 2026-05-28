@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { newEventBus } from '../../src/core/eventBus.ts'
+import { newEventBus } from '@repo/siokit-core'
 
 type Empty = { [key: string]: (...args: any[]) => void }
 

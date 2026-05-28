@@ -1,9 +1,9 @@
-import { newEventBus } from '../core/eventBus.ts'
-import type { DefaultEventsMap, EventsMap, EventNames, EventParams } from '../core/event.ts'
+import { newEventBus } from '@repo/siokit-core'
+import type { DefaultEventsMap, EventsMap, EventNames, EventParams } from '@repo/siokit-core'
+import { PacketType } from '@repo/siokit-parser'
+import type { SioPacket } from '@repo/siokit-parser'
 import { createEioServer, type WsSession } from '../eio/server.ts'
 import type { Conn } from '../eio/server.ts'
-import { PacketType } from './parser/index.ts'
-import type { SioPacket } from './parser/index.ts'
 import { createNamespace } from './namespace.ts'
 import type { Namespace } from './namespace.ts'
 import { createSocket } from './socket.ts'
@@ -144,7 +144,6 @@ export const createServer = <
     websocket: {
       open(ws: WsRaw<WsSession>) {
         ws.data = app.createWsSession(ws)
-        console.log('WebSocket connection established')
       },
       message(ws: WsRaw<WsSession>, data: RawData) { (ws.data).handleData(data) },
       close(ws: WsRaw<WsSession>) { (ws.data).close('transport close') },

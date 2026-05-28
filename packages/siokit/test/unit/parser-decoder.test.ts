@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
-import { newDecoder } from '../../src/sio/parser/decode.ts'
-import { PacketType } from '../../src/sio/parser/shared.ts'
+import { newDecoder } from '@repo/siokit-parser'
+import { PacketType } from '@repo/siokit-parser'
 
 describe('newDecoder', () => {
   it('decodes a plain EVENT string and emits decoded', () => {

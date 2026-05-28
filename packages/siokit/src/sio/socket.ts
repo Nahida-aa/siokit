@@ -1,10 +1,9 @@
-import { newEventBus } from '../core/eventBus.ts'
-import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
+import { newEventBus } from '@repo/siokit-core'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener, AllButLast, EventNamesWithAck, FirstNonErrorArg, Last  } from '@repo/siokit-core'
 import type { Conn } from '../eio/server.ts'
-import { encodeSioPacket, PacketType } from './parser/index.ts'
-import { encodeSioPacketBinary, hasBinary } from './parser/binary.ts'
-import type { SioPacket } from './parser/index.ts'
-import { AllButLast, EventNamesWithAck, FirstNonErrorArg, Last } from './type.ts';
+import { encodeSioPacket, PacketType } from '@repo/siokit-parser'
+import { encodeSioPacketBinary, hasBinary } from '@repo/siokit-parser'
+import type { SioPacket } from '@repo/siokit-parser'
 
 type SocketReservedEvents = {
   disconnect: (reason: string) => void

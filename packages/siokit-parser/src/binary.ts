@@ -53,10 +53,10 @@ export const replacePlaceholders = (data: unknown, attachments: Uint8Array[]): u
 
 export const encodeSioPacketBinary = (
   packet: SioPacket,
-): { text: string; attachments: Uint8Array[] } | null => {
+): { text: string; attachments: Uint8Array<ArrayBuffer>[] } | null => {
   if (!hasBinary(packet.data)) return null
 
-  const bins: Uint8Array[] = []
+  const bins: Uint8Array<ArrayBuffer>[] = []
   const dataClean = extractBinaries(packet.data, bins)
   const binaryType = packet.type === PacketType.ACK ? PacketType.BINARY_ACK : PacketType.BINARY_EVENT
   const text = encodeTextPacket({ ...packet, type: binaryType, data: dataClean, attachments: bins.length })

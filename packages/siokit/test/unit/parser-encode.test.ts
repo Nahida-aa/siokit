@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
-import { encodeSioPacket } from '../../src/sio/parser/encode.ts'
-import { PacketType } from '../../src/sio/parser/shared.ts'
+import { encodeSioPacket } from '@repo/siokit-parser'
+import { PacketType } from '@repo/siokit-parser'
 
 describe('encodeSioPacket', () => {
   it('CONNECT', () => {

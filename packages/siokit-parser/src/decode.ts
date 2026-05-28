@@ -1,4 +1,4 @@
-import { newEventBus } from '../../core/eventBus.ts'
+import { newEventBus } from '@repo/siokit-core'
 import { PacketType, type SioPacket } from './shared.ts'
 import { reconstructPacket } from './binary.ts'
 import { isBinary } from './is-binary.ts'
