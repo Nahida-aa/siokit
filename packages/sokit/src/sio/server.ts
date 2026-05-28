@@ -10,32 +10,22 @@ import type { Namespace } from './namespace.ts'
 import { createSocket } from './socket.ts'
 import type { ServerSocket } from './socket.ts'
 
-let wsModule: any = null
-const loadWs = async () => {
-  if (!wsModule) wsModule = await import('ws')
-  return wsModule.WebSocketServer
-}
-
 type ServerReservedEvents = {
   connection: (socket: ServerSocket) => void
   disconnect: (socket: ServerSocket) => void
 }
 
-type ServerOptions = {
+export type ServerOptions = {
   pingInterval?: number
   pingTimeout?: number
   maxPayload?: number
 }
 
-declare const Bun: {
-  serve: (opts: any) => any
-} | undefined
-
 export const createServer = <
-	ListenEvents extends EventsMap = DefaultEventsMap,
-	EmitEvents extends EventsMap = ListenEvents,
-	ServerSideEvents extends EventsMap = DefaultEventsMap,
-	SocketData = any,
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
 >(opts?: ServerOptions) => {
   const emitter = createEmitter<EventsMap, EventsMap, ServerReservedEvents>()
   const namespaces = new Map<string, Namespace>()
@@ -93,7 +83,7 @@ export const createServer = <
     } catch {}
   }
 
-  const handleWsOpen = (ws: object) => {
+  const handleConnection = (ws: object) => {
     const eio = createEioSocket(ws as unknown as WsRaw, {
       pingInterval: opts?.pingInterval,
       pingTimeout: opts?.pingTimeout,
@@ -126,6 +116,16 @@ export const createServer = <
     eio.on('close', onClose)
   }
 
+  const handleMessage = (ws: object, data: any) => {
+    const eio = wsToEio.get(ws)
+    if (eio) eio.handleData(data)
+  }
+
+  const handleClose = (ws: object) => {
+    const eio = wsToEio.get(ws)
+    if (eio) eio.close('transport close')
+  }
+
   const app = {
     ...emitter,
 
@@ -144,44 +144,14 @@ export const createServer = <
     get default() { return defaultNsp },
     get namespaces() { return namespaces },
 
-    listen: async (port: number, cb?: () => void) => {
-      if (typeof Bun !== 'undefined') {
-        const b = Bun!
-        b.serve({
-          port,
-          fetch(req: any, server: any) {
-            if (server.upgrade(req)) return
-            return new Response('Not Found', { status: 404 })
-          },
-          websocket: {
-            open(ws: any) { handleWsOpen(ws) },
-            message(ws: any, msg: any) {
-              const eio = wsToEio.get(ws)
-              if (eio) eio.handleData(msg)
-            },
-            close(ws: any) {
-              const eio = wsToEio.get(ws)
-              if (eio) eio.close('transport close')
-            },
-          },
-        })
-      } else {
-        const WebSocketServer = await loadWs()
-        const wss = new WebSocketServer({ port })
-        wss.on('connection', (ws: any) => {
-          handleWsOpen(ws)
-          ws.on('message', (data: any) => {
-            const eio = wsToEio.get(ws)
-            if (eio) eio.handleData(data)
-          })
-          ws.on('close', () => {
-            const eio = wsToEio.get(ws)
-            if (eio) eio.close('transport close')
-          })
-        })
-      }
-      if (cb) cb()
-      return app
+    handleConnection,
+    handleMessage,
+    handleClose,
+
+    ws: {
+      open: (ws: any) => handleConnection(ws),
+      message: (ws: any, msg: any) => handleMessage(ws, msg),
+      close: (ws: any) => handleClose(ws),
     },
   }
 

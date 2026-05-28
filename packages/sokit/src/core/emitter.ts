@@ -68,12 +68,6 @@ export const createEmitter = <
     ) {
       return (handlers.get(event) || []) as ((...args: any[]) => void)[]
     },
-
-    hasListeners<Ev extends (keyof ListenEvents | keyof ReservedEvents) & (string | symbol)>(
-      event: Ev,
-    ) {
-      return (handlers.get(event)?.length ?? 0) > 0
-    },
   }
 
   return bus

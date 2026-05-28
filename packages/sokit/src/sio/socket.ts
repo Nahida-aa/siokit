@@ -23,7 +23,6 @@ export interface ServerSocket {
   disconnect(): void
   to(room: string): { emit: (event: string, ...args: any[]) => ServerSocket }
   listeners(event: string): ((...args: any[]) => void)[]
-  hasListeners(event: string): boolean
   _handlePacket(packet: SioPacket): void
   _disconnect(reason: string): void
   _send(packet: SioPacket): void
@@ -114,7 +113,6 @@ export const createSocket = (
       return sock
     },
     listeners: (event: string) => emitter.listeners(event as any),
-    hasListeners: (event: string) => emitter.hasListeners(event as any),
 
     emit: (event: string, ...args: any[]) => {
       const data = [event, ...args]

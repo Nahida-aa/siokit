@@ -18,7 +18,6 @@ export interface Namespace {
   off(event?: string, handler?: (...args: any[]) => void): Namespace
   once(event: string, handler: (...args: any[]) => void): Namespace
   listeners(event: string): ((...args: any[]) => void)[]
-  hasListeners(event: string): boolean
   _addSocket(socket: ServerSocket): void
   _removeSocket(socket: ServerSocket): void
   _broadcast(event: string, args: any[], from: ServerSocket, room?: string): void
@@ -81,7 +80,6 @@ export const createNamespace = (name: string): Namespace => {
       return nsp
     },
     listeners: (event: string) => emitter.listeners(event as any),
-    hasListeners: (event: string) => emitter.hasListeners(event as any),
     use: (fn) => { middlewares.push(fn); return nsp },
     _addSocket,
     _removeSocket,
