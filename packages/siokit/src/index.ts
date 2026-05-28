@@ -1,4 +1,4 @@
-export  { WsSession } from './eio/server.ts';
+export type { WsSession } from './eio/server.ts';
 export { newServer } from './sio/server.ts'
 export type { Socket } from './sio/socket.ts'
 export type { Namespace } from './sio/namespace.ts'
