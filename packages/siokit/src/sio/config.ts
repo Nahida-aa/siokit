@@ -56,6 +56,11 @@ export interface ServerOptions {
    * @default true
    */
   httpCompression?: boolean | object;
+    /**
+   * name of the path to capture
+   * @default "/io"
+   */
+  path?: string;
 }
 export const serverOptions = (opts?:ServerOptions) => ({
   pingTimeout: opts?.pingTimeout ?? 20000,
@@ -67,5 +72,6 @@ export const serverOptions = (opts?:ServerOptions) => ({
   httpCompression: {
     threshold: 1024,
   },
+  path: "/io",
   ...opts,
 } satisfies ServerOptions)

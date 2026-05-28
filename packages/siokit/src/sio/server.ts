@@ -141,7 +141,7 @@ export const newServer = <
     get namespaces() { return namespaces },
     idleTimeout: ((opts.pingInterval ?? 25000) / 1000) + 35,
     fetch: (req: Request) => eioServer.handleRequest(req),
-    createWsSession: (ws: { send(data: string | Uint8Array): void }) => eioServer.createWsSession(ws),
+    createWsSession: (ws: { send(data: string | Uint8Array<ArrayBuffer>): void }) => eioServer.createWsSession(ws),
     websocket: {
       open(ws: WsRaw<WsSession>) {
         ws.data = app.createWsSession(ws)

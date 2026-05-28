@@ -28,7 +28,7 @@ hono.get('/socket.io/', upgradeWebSocket((c) => {
   return {
     onOpen(_event, ws) {
       const transport = {
-        send: (data: string | Uint8Array) => ws.send(data as string | ArrayBuffer | Uint8Array<ArrayBuffer>),
+        send: ws.send,
       }
       session = sokitApp.createWsSession(transport)
     },
