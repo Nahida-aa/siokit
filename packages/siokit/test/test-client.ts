@@ -1,57 +1,122 @@
-import { io as ioc } from 'socket.io-client'
+import { newServer } from '../src/index.ts'
+import { newSocket } from '../../siokit-client/src/index.ts'
 
-const socket = ioc('http://localhost:4000', {
-  transports: ['websocket'],
-  forceNew: true,
-})
+const PORT = 4010
+const URL = `http://localhost:${PORT}`
 
-socket.onAny((event, ...args) => {
-  console.log(`[onAny] ${event}`, args)
-})
+const app = newServer()
 
-socket.on('connect', () => {
-  console.log('[client] connected! id:', socket.id)
-
-  socket.emit('hello')
-  socket.emit('message', 'hello from client')
-  socket.emit('msg', 'chat message')
-  socket.emit('ping', (resp: any) => {
-    console.log('[client] ping response:', resp)
+app.on('connection', (socket) => {
+  socket.on('hello', () => {
+    socket.emit('reply', 'world')
   })
-  socket.emit('echo', { hello: 'world' })
-  socket.emit('binaryEcho', new Uint8Array([10, 20, 30]))
+
+  socket.on('ping', (cb: any) => {
+    if (typeof cb === 'function') cb('pong')
+  })
+
+  socket.on('echo', (data: any) => {
+    socket.emit('echo', data)
+  })
+
+  socket.on('binaryEcho', (data: any, cb?: any) => {
+    socket.emit('binaryReply', data)
+    if (typeof cb === 'function') cb('ok')
+  })
+
+  socket.on('broadcast', (msg: string) => {
+    app.emit('broadcast', msg)
+  })
+})
+const server = Bun.serve({
+  port: PORT,
+  fetch(req, srv) {
+    if (srv.upgrade(req)) return
+    return new Response('Not Found', { status: 404 })
+  },
+  websocket: {
+    open(ws: any) { ws.data = app.createWsSession(ws) },
+    message(ws: any, data) { ws.data.handleData(data) },
+    close(ws: any) { ws.data.close('transport close') },
+  },
 })
 
-socket.on('noArg', () => {
-  console.log('[client] noArg received')
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+const assert = (cond: boolean, msg: string) => {
+  if (!cond) { console.error(`FAIL: ${msg}`); process.exit(1) }
+  else console.log(`PASS: ${msg}`)
+}
+
+const connect = () => new Promise<any>((resolve, reject) => {
+  const client = newSocket(URL)
+  client.on('connect', () => resolve(client))
+  client.on('connect_error', (err: Error) => reject(err))
+  setTimeout(() => reject(new Error('connect timeout')), 3000)
 })
 
-socket.on('basicEmit', (a: number, b: string, c: Uint8Array) => {
-  console.log('[client] basicEmit received:', { a, b, c: Array.from(c) })
-})
+const main = async () => {
+  // Test 1: connect + on/emit
+  {
+    const client = await connect()
+    const reply = await new Promise<string>((resolve) => {
+      client.on('reply', (data: string) => resolve(data))
+      client.emit('hello')
+    })
+    await sleep(50)
+    assert(reply === 'world', 'client: basic emit + on')
+    client.disconnect()
+    await sleep(50)
+  }
 
-socket.on('reply', (data: { received: boolean }) => {
-  console.log('[client] reply received:', data)
-})
+  // Test 2: emitWithAck
+  {
+    const client = await connect()
+    const resp = await client.emitWithAck('ping')
+    assert(resp === 'pong', 'client: emitWithAck')
+    client.disconnect()
+    await sleep(50)
+  }
 
-socket.on('msg', (data: string[]) => {
-  console.log('[client] msg received:', data)
-})
+  // Test 3: binary roundtrip
+  {
+    const client = await connect()
+    const sent = new Uint8Array([1, 2, 3, 4, 255])
+    const received = await new Promise<any>((resolve) => {
+      client.on('binaryReply', (data: any) => resolve(data))
+      client.emit('binaryEcho', sent)
+    })
+    await sleep(50)
+    assert(received instanceof Uint8Array, 'client-binary: type')
+    assert(
+      JSON.stringify(Array.from(received)) === JSON.stringify(Array.from(sent)),
+      'client-binary: values',
+    )
+    client.disconnect()
+    await sleep(50)
+  }
 
-socket.on('echo', (data: any) => {
-  console.log('[client] echo received:', data)
-})
+  // Test 4: broadcast
+  {
+    const alice = await connect()
+    const bob = await connect()
 
-socket.on('connect_error', (err: any) => {
-  console.error('[client] connect_error:', err.message)
-})
+    const received: string[] = []
+    bob.on('broadcast', (msg: string) => received.push(msg))
 
-socket.on('disconnect', (reason: any) => {
-  console.log('[client] disconnected:', reason)
-})
+    alice.emit('broadcast', 'hi from alice')
+    await sleep(100)
+    assert(received.length === 1, 'client-broadcast: count')
+    assert(received[0] === 'hi from alice', 'client-broadcast: content')
 
-setTimeout(() => {
-  console.log('[client] disconnecting...')
-  socket.disconnect()
+    alice.disconnect()
+    bob.disconnect()
+    await sleep(50)
+  }
+
+  console.log('\nAll client tests passed!')
+  server.stop()
   process.exit(0)
-}, 3000)
+}
+
+main().catch((err) => { console.error(err); process.exit(1) })

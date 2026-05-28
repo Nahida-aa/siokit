@@ -112,7 +112,7 @@ export const newServer = <
     transports: opts.transports,
     onconn: setupTransport,
   })
-
+ 
   const app = {
     onConnection: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => void) => {
       emitter.on('connection', fn)
@@ -133,6 +133,7 @@ export const newServer = <
 
     use: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void) => {
       defaultNsp.use(fn)
+      
       return app
     },
 

@@ -35,10 +35,10 @@
     },
     "packages/siokit": {
       "name": "siokit",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
-        "siokit-core": "^0.1.0",
-        "siokit-parser": "^0.1.1",
+        "siokit-core": "^0.1.2",
+        "siokit-parser": "^0.1.2",
       },
       "devDependencies": {
         "@types/bun": "^1.3.14",
@@ -50,7 +50,7 @@
     },
     "packages/siokit-client": {
       "name": "siokit-client",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "siokit-core": "workspace:*",
         "siokit-parser": "workspace:*",
@@ -58,13 +58,13 @@
     },
     "packages/siokit-core": {
       "name": "siokit-core",
-      "version": "0.1.0",
+      "version": "0.1.2",
     },
     "packages/siokit-parser": {
       "name": "siokit-parser",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
-        "siokit-core": "^0.1.0",
+        "siokit-core": "^0.1.2",
       },
     },
   },
@@ -556,12 +556,6 @@
     "@manypkg/get-packages/@changesets/types": ["@changesets/types@4.1.0", "", {}, "sha512-LDQvVDv5Kb50ny2s25Fhm3d9QSZimsoUGBsUioj6MC3qbMUCuC8GPIvk/M6IvXx3lYhAs0lwWUQLb+VIEUCECw=="],
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
-
-    "api/siokit": ["siokit@0.1.2", "", { "dependencies": { "siokit-core": "^0.1.2", "siokit-parser": "^0.1.2" } }, "sha512-JYobNgvu/rqMX44KxCmRd9CWkDhZYYeoRfAQ6jRyunV4BQvKYFT8n55dd5iG3C8itq8L0upsdMKw60lfB6J9ug=="],
-
-    "api/siokit-core": ["siokit-core@0.1.2", "", {}, "sha512-OUorQ0plDbd+T0T/m7LYV2lcrP2DTXM+c7MZDpddq/bnxiYmREepwvEwUH1yk9ithI6mcsXwEoIFHBfL+QwCQQ=="],
-
-    "api/siokit-parser": ["siokit-parser@0.1.2", "", { "dependencies": { "siokit-core": "^0.1.2" } }, "sha512-32QUIc1aIrS3MvBEog9MD2KfFtosQbVPu7DXxwaIivG4gjQ+KcOND3GBqUJEqNa2Z3udw3ZNrbikqVct5izJIA=="],
 
     "onnxruntime-web/onnxruntime-common": ["onnxruntime-common@1.24.0-dev.20251116-b39e144322", "", {}, "sha512-BOoomdHYmNRL5r4iQ4bMvsl2t0/hzVQ3OM3PHD0gxeXu1PmggqBv3puZicEUVOA3AtHHYmqZtjMj9FOfGrATTw=="],
 

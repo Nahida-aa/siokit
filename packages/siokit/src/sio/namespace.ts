@@ -4,9 +4,14 @@ import { encodeSioPacket, PacketType } from 'siokit-parser'
 import type { SioPacket } from 'siokit-parser'
 import type { Socket } from './socket.ts'
 
-type NsReservedEvents<SocketT> = {
-  connection: (socket: SocketT) => void
-  connect: (socket: SocketT) => void
+type NsReservedEvents<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+  ServerSideEvents extends EventsMap = DefaultEventsMap,
+  SocketData = any,
+> = {
+  connection: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => void
+  connect: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => void
 }
 
 export interface BroadcastOperator<EmitEvents extends EventsMap> {
@@ -21,7 +26,7 @@ export const createNamespace = <
   ServerSideEvents extends EventsMap = DefaultEventsMap,
   SocketData = any,
 >(name: string) => {
-  const emitter = newEventBus<{}, {}, NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>>()
+  const emitter = newEventBus<ListenEvents, EmitEvents,  NsReservedEvents<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
   const sockets = new Map<string, Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
   const middlewares: Array<(socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void> = []
 
@@ -80,9 +85,9 @@ export const createNamespace = <
     sockets,
     middlewares,
 
-    on: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
+    on: <Ev extends ReservedOrUserEventNames<NsReservedEvents<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, {}>>(
       event: Ev,
-      fn: ReservedOrUserListener<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}, Ev>,
+      fn: ReservedOrUserListener<NsReservedEvents<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, {}, Ev>,
     ) => { emitter.on(event, fn); return nsp },
 
     use: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void) => {
