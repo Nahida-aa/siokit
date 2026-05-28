@@ -22,9 +22,9 @@
         "cors": "^2.8.6",
         "hono": "^4.12.23",
         "onnxruntime-node": "^1.26.0",
-        "siokit": "^0.1.2",
-        "siokit-core": "0.1.2",
-        "siokit-parser": "0.1.2",
+        "siokit": "0.1.4",
+        "siokit-core": "0.1.4",
+        "siokit-parser": "0.1.4",
         "socket.io": "^4.8.3",
         "socket.io-parser": "^4.2.6",
         "zod": "^4.4.3",
@@ -35,7 +35,7 @@
     },
     "packages/siokit": {
       "name": "siokit",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "siokit-core": "^0.1.2",
         "siokit-parser": "^0.1.2",
@@ -50,7 +50,7 @@
     },
     "packages/siokit-client": {
       "name": "siokit-client",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "siokit-core": "workspace:*",
         "siokit-parser": "workspace:*",
@@ -58,11 +58,11 @@
     },
     "packages/siokit-core": {
       "name": "siokit-core",
-      "version": "0.1.2",
+      "version": "0.1.3",
     },
     "packages/siokit-parser": {
       "name": "siokit-parser",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "siokit-core": "^0.1.2",
       },
@@ -556,6 +556,12 @@
     "@manypkg/get-packages/@changesets/types": ["@changesets/types@4.1.0", "", {}, "sha512-LDQvVDv5Kb50ny2s25Fhm3d9QSZimsoUGBsUioj6MC3qbMUCuC8GPIvk/M6IvXx3lYhAs0lwWUQLb+VIEUCECw=="],
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
+
+    "api/siokit": ["siokit@0.1.4", "", { "dependencies": { "siokit-core": "^0.1.4", "siokit-parser": "^0.1.4" } }, "sha512-/sEEV3qjcuewXqZtttjrOlGYnP4q9YeNm2nWuRIMdQtAW0vqnR3BrkaYjd9+nkRlaxS9IiNfFCbN0r/hjch8jw=="],
+
+    "api/siokit-core": ["siokit-core@0.1.4", "", {}, "sha512-OohnASPe+7ugMG5glvMqAqBff10xoHFUgpFIIiCeOwesN5C0KBtmG3xoh9IE4td3gWYC4dH6YHlDzjHgVlrxBA=="],
+
+    "api/siokit-parser": ["siokit-parser@0.1.4", "", { "dependencies": { "siokit-core": "^0.1.4" } }, "sha512-36BlAtMOAWD20uIsW851vP6O81h6BjhvzVzqgO/PCEruX9uNrKaIs97x3TAtSPLgvXiBSEapIrdsOb4syG75Gg=="],
 
     "onnxruntime-web/onnxruntime-common": ["onnxruntime-common@1.24.0-dev.20251116-b39e144322", "", {}, "sha512-BOoomdHYmNRL5r4iQ4bMvsl2t0/hzVQ3OM3PHD0gxeXu1PmggqBv3puZicEUVOA3AtHHYmqZtjMj9FOfGrATTw=="],
 

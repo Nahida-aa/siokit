@@ -33,8 +33,8 @@ app.on('connection', (socket) => {
   })
 })
 
-const chat = app.of('/admin')
-chat.on('connection', (socket) => {
+const admin = app.of('/admin')
+admin.on('connection', (socket) => {
   socket.on('msg', (text: string) => {
     console.log(`[admin] ${socket.id}: ${text}`)
     app.of('/admin').emit('msg', [text])
