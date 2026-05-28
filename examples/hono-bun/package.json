@@ -15,9 +15,9 @@
     "cors": "^2.8.6",
     "hono": "^4.12.23",
     "onnxruntime-node": "^1.26.0",
-    "siokit": "^0.1.2",
-    "siokit-core": "0.1.2",
-    "siokit-parser": "0.1.2",
+    "siokit": "^0.1.3",
+    "siokit-core": "0.1.3",
+    "siokit-parser": "0.1.3",
     "socket.io": "^4.8.3",
     "socket.io-parser": "^4.2.6",
     "zod": "^4.4.3"

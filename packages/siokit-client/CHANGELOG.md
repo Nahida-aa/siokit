@@ -1,5 +1,13 @@
 # siokit-client
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - siokit-core@0.1.3
+  - siokit-parser@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

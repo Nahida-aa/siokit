@@ -1,5 +1,15 @@
 # siokit
 
+## 0.1.3
+
+### Patch Changes
+
+- [`f55e255`](https://github.com/Nahida-aa/siokit/commit/f55e2559f3cac69ad4273d92cb3df17178fb072f) Thanks [@Nahida-aa](https://github.com/Nahida-aa)! - Patch release for latest updates.
+
+- Updated dependencies []:
+  - siokit-core@0.1.3
+  - siokit-parser@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
