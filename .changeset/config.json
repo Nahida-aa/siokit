@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
   "changelog": ["@changesets/changelog-github", { "repo": "Nahida-aa/siokit" }],
   "commit": false,
-  "fixed": [],
+  "fixed": [["siokit", "siokit-client", "siokit-core", "siokit-parser"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

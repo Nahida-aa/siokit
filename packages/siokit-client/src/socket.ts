@@ -10,7 +10,7 @@ type ClientReservedEvents = {
   connect_error: (err: Error) => void
 }
 
-export const createClientSocket = <
+export const newSocket = <
   ListenEvents extends EventsMap = DefaultEventsMap,
   EmitEvents extends EventsMap = ListenEvents,
 >(
@@ -133,4 +133,4 @@ export const createClientSocket = <
 export type ClientSocket<
   ListenEvents extends EventsMap = DefaultEventsMap,
   EmitEvents extends EventsMap = ListenEvents,
-> = ReturnType<typeof createClientSocket<ListenEvents, EmitEvents>>
+> = ReturnType<typeof newSocket<ListenEvents, EmitEvents>>

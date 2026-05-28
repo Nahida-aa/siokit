@@ -22,7 +22,7 @@ type ServerReservedEvents<
   disconnect: (socket: any) => void
 }
 
-export const createServer = <
+export const newServer = <
   ListenEvents extends EventsMap = DefaultEventsMap,
   EmitEvents extends EventsMap = ListenEvents,
   ServerSideEvents extends EventsMap = DefaultEventsMap,

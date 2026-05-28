@@ -1,4 +1,4 @@
-export { createServer } from './sio/server.ts'
+export { newServer } from './sio/server.ts'
 export type { Socket } from './sio/socket.ts'
 export type { Namespace } from './sio/namespace.ts'
 export { createNamespace } from './sio/namespace.ts'

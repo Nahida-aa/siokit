@@ -1,6 +1,6 @@
-import { createServer } from 'siokit'
+import { newServer } from 'siokit'
 
-const app = createServer<
+const app = newServer<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,

@@ -21,10 +21,10 @@ Socket.IO-compatible server & client library written in TypeScript.
 ### Server
 
 ```ts
-import { createServer } from 'siokit'
-import { createClientSocket } from 'siokit-client'
+import { newServer } from 'siokit'
+import { newSocket } from 'siokit-client'
 
-const app = createServer()
+const app = newServer()
 
 app.on('connection', (socket) => {
   socket.on('hello', () => {
@@ -46,7 +46,7 @@ Bun.serve({
 ### Client
 
 ```ts
-const socket = createClientSocket('http://localhost:3000')
+const socket = newSocket('http://localhost:3000')
 socket.on('connect', () => {
   socket.emit('hello')
   socket.on('reply', (msg) => console.log(msg)) // 'world'

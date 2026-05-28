@@ -1,10 +1,10 @@
-import { createServer } from '../src/index.ts'
+import { newServer } from '../src/index.ts'
 import { io as ioc } from 'socket.io-client'
 
 const PORT = 4000
 const URL = `http://localhost:${PORT}`
 
-const app = createServer()
+const app = newServer()
 
 interface Result {
   client: string

@@ -1,9 +1,9 @@
-import { createServer } from '../src/index.ts'
+import { newServer } from '../src/index.ts'
 import { WsSession } from '../src/eio/server.ts';
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './types.ts';
 
 
-const app = createServer<
+const app = newServer<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,

@@ -1,13 +1,13 @@
 import { Hono } from 'hono'
 import { upgradeWebSocket, websocket } from 'hono/bun'
-import { createServer } from '../src/index.ts'
+import { newServer } from '../src/index.ts'
 import type { WsSession } from '../src/eio/server.ts'
 import { io as ioc } from 'socket.io-client'
 
 const PORT = 4003
 const URL = `http://localhost:${PORT}`
 
-const sokitApp = createServer()
+const sokitApp = newServer()
 const hono = new Hono()
 
 sokitApp.on('connection', (socket) => {

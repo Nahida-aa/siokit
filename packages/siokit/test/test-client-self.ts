@@ -1,10 +1,10 @@
-import { createServer } from '../src/index.ts'
-import { createClientSocket } from '../../siokit-client/src/index.ts'
+import { newServer } from '../src/index.ts'
+import { newSocket } from '../../siokit-client/src/index.ts'
 
 const PORT = 4010
 const URL = `http://localhost:${PORT}`
 
-const app = createServer()
+const app = newServer()
 
 app.on('connection', (socket) => {
   socket.on('hello', () => {
@@ -49,7 +49,7 @@ const assert = (cond: boolean, msg: string) => {
 }
 
 const connect = () => new Promise<any>((resolve, reject) => {
-  const client = createClientSocket(URL)
+  const client = newSocket(URL)
   client.on('connect', () => resolve(client))
   client.on('connect_error', (err: Error) => reject(err))
   setTimeout(() => reject(new Error('connect timeout')), 3000)
