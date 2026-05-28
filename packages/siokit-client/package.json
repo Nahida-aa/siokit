@@ -1,6 +1,6 @@
 {
   "name": "siokit-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Socket.IO-compatible client — WebSocket transport with typed emit/on/emitWithAck and binary support",
   "keywords": [
     "socket.io",
@@ -41,6 +41,6 @@
   },
   "dependencies": {
     "siokit-core": "^0.1.0",
-    "siokit-parser": "^0.1.0"
+    "siokit-parser": "^0.1.1"
   }
 }

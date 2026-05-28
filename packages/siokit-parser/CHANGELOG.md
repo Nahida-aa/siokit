@@ -1,5 +1,11 @@
 # siokit-parser
 
+## 0.1.1
+
+### Patch Changes
+
+- [`044d7dc`](https://github.com/Nahida-aa/siokit/commit/044d7dce66a6c554e26eb80e20b208c1ea99c01a) Thanks [@Nahida-aa](https://github.com/Nahida-aa)! - Fix published dependency ranges to avoid leaking workspace protocol to consumers.
+
 ## 0.1.0
 
 ### Minor Changes
