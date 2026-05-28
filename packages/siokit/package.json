@@ -25,8 +25,14 @@
     "prepublishOnly": "bun run build && cp ../../README.md . 2>/dev/null; cp ../../LICENSE . 2>/dev/null"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "publishConfig": {
     "exports": {
       ".": {

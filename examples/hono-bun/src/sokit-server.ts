@@ -15,7 +15,7 @@ app.use((socket, next) => {
   next()
 })
 
-app.onConnection((socket) => {
+app.on('connection', (socket) => {
   console.log(`[connect] ${socket.id}`)
 
   socket.on('message',async (data) => {

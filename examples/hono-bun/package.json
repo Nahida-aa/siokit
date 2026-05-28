@@ -5,7 +5,8 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -14,9 +15,11 @@
     "cors": "^2.8.6",
     "hono": "^4.12.23",
     "onnxruntime-node": "^1.26.0",
+    "siokit": "^0.1.2",
+    "siokit-core": "0.1.2",
+    "siokit-parser": "0.1.2",
     "socket.io": "^4.8.3",
     "socket.io-parser": "^4.2.6",
-    "siokit": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {
