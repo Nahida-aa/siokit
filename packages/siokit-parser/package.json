@@ -1,6 +1,6 @@
 {
   "name": "siokit-parser",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Socket.IO packet parser — encode, decode, and binary attachment handling for siokit",
   "keywords": [
     "socket.io",
