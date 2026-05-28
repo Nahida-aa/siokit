@@ -8,20 +8,6 @@ type EioReservedEvents = {
   close: (reason: string) => void
 }
 
-export interface EioSocket {
-  id: string
-  closed: boolean
-  sendOpen: () => void
-  sendMessage: (payload: string) => void
-  sendBinary: (payload:  Uint8Array) => void
-  startPingTimers: () => void
-  scheduleNextPing: () => void
-  handleData: (raw: any) => void
-  close: (reason: string) => void
-  on(event: string, handler: (...args: any[]) => void): any
-  off(event?: string, handler?: (...args: any[]) => void): any
-}
-
 let eioIdCounter = 0
 const genEioId = () => {
   eioIdCounter++
@@ -42,10 +28,10 @@ const toStr = (raw: any): string => {
   return String(raw)
 }
 
-export const createEioSocket = (
+export const newConn = (
   ws: WsRaw,
   opts?: { pingInterval?: number; pingTimeout?: number; maxPayload?: number },
-): EioSocket => {
+) => {
   const emitter = newEventBus<{}, {}, EioReservedEvents>()
   let pingTimeoutTimer: ReturnType<typeof setTimeout> | null = null
   let pingIntervalTimer: ReturnType<typeof setTimeout> | null = null
@@ -151,7 +137,7 @@ export const createEioSocket = (
     sendRaw(payload)
   }
 
-  const eio: EioSocket = {
+  return {
     ...emitter,
     id: hb.sid,
     sendOpen,
@@ -163,6 +149,6 @@ export const createEioSocket = (
     close: _close,
     get closed() { return closed },
   }
-
-  return eio
 }
+
+export type Conn = ReturnType<typeof newConn>

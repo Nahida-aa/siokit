@@ -1,6 +1,6 @@
 import { newEventBus } from '../core/eventBus.ts'
 import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
-import type { EioSocket } from '../eio/server.ts'
+import type { Conn } from '../eio/server.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import { encodeSioPacketBinary, hasBinary } from './parser/binary.ts'
 import type { SioPacket } from './parser/index.ts'
@@ -16,8 +16,8 @@ export const createSocket = <
   ServerSideEvents extends EventsMap = DefaultEventsMap,
   SocketData = any,
 >(
-  eio: EioSocket,
-  nsp: { name: string; _removeSocket: (s: any) => void; _broadcast: (event: string, args: any[], from: any, room?: string) => void },
+  eio: Conn,
+  nsp: { name: string; _removeSocket: (s: any) => void },
   sessionId: string,
 )=> {
   const emitter = newEventBus<ListenEvents, EmitEvents, SocketReservedEvents>()

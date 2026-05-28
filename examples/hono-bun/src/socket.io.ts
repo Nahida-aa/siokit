@@ -34,7 +34,11 @@ app.on('connect', async (socket) => {
   })
 
   const res = await socket.emitWithAck('withAck', 'Are you there?')
-
+  
+  app.to('room1').except(socket.id).emit('msg', ['room1msg'])
+  app.to(['room1', 'room1']).except(socket.id).emit('msg', ['room1msg'])
+  app.to(['room1', 'socket1']).except(socket.id).emit('msg', ['room1msg'])
+  
   socket.on('disconnect', () => {
     console.log(`[disconnect] ${socket.id}`)
   })
@@ -46,5 +50,6 @@ chat.on('connection', (socket) => {
     console.log(`[chat] ${socket.id}: ${text}`)
     app.of('/chat').emit('msg', [text],)
   })
+  app.of('/chat').except(socket.id).emit('msg', [`${socket.id} has joined the chat`])
 })
 

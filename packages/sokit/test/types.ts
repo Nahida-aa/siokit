@@ -2,7 +2,7 @@ export interface ServerToClientEvents {
   noArg: () => void;
   basicEmit: (a: number, b: string, c: Uint8Array) => void;
   withAck: (d: string, callback: (e: number) => void) => void;
-  reply: (data: { received: boolean }) => void;
+  reply: (data: { received: boolean } | { from: string }) => void;
   msg: (data: string[]) => void;
   echo: (data: { hello: string }) => void;
 }

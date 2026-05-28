@@ -6,7 +6,20 @@ const app = createServer<
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->()
+>({
+  cors: {
+		origin: [
+			'https://admin.socket.io',
+			'http://localhost:4000',
+			'http://localhost:3000',
+			'http://localhost:3001',
+			'http://localhost:3002',
+      'http://localhost:8000',
+      'http://localhost:9007',
+		],
+		credentials: true,
+	},
+})
 
 app.use((socket, next) => {
   console.log(`[middleware] ${socket.id}`)
@@ -31,12 +44,19 @@ app.on('connection', (socket) => {
 
   socket.on('msg', (text) => {
     console.log(`[msg] ${socket.id}: ${text}`)
+    app.emit('msg', [text, 'broadcast!'])
   })
 
   socket.on('binaryEcho', (data) => {
     console.log(`[binaryEcho] ${socket.id}:`, data)
     socket.emit('echo', { hello: 'from binaryEcho' })
   })
+
+  setTimeout(() => {
+    app.to(socket.id).emit('reply', { from: 'to(socket.id)' })
+    app.to('nonexistent').emit('reply', { from: 'to(nonexistent)' })
+    app.except(socket.id).emit('reply', { from: 'except(socket.id)' })
+  }, 100)
 
   socket.on('ping', (cb) => {
     if (typeof cb === 'function') cb('pong')

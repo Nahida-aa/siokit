@@ -1,5 +1,5 @@
 import { newEventBus } from '../core/eventBus.ts'
-import type { EventsMap, DefaultEventsMap, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
+import type { EventsMap, DefaultEventsMap, EventNames, EventParams, ReservedOrUserEventNames, ReservedOrUserListener } from '../core/event.ts'
 import { encodeSioPacket, PacketType } from './parser/index.ts'
 import type { SioPacket } from './parser/index.ts'
 import type { Socket } from './socket.ts'
@@ -7,6 +7,12 @@ import type { Socket } from './socket.ts'
 type NsReservedEvents<SocketT> = {
   connection: (socket: SocketT) => void
   connect: (socket: SocketT) => void
+}
+
+export interface BroadcastOperator<EmitEvents extends EventsMap> {
+  emit<Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>): BroadcastOperator<EmitEvents>
+  to(room: string | string[]): BroadcastOperator<EmitEvents>
+  except(id: string): BroadcastOperator<EmitEvents>
 }
 
 export const createNamespace = <
@@ -19,6 +25,31 @@ export const createNamespace = <
   const sockets = new Map<string, Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>()
   const middlewares: Array<(socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void> = []
 
+  const _sendToSockets = (rooms: string[], excludes: string[], event: string, args: unknown[]) => {
+    for (const [, sock] of sockets) {
+      if (excludes.includes(sock.id)) continue
+      if (rooms.length > 0 && !rooms.some(r => sock.rooms.has(r))) continue
+      sock._send({ type: PacketType.EVENT, data: [event, ...args], nsp: name })
+    }
+  }
+
+  const createBroadcastOperator = (rooms: string[], excludes: string[]): BroadcastOperator<EmitEvents> => {
+    const op: BroadcastOperator<EmitEvents> = {
+      emit: <Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>) => {
+        _sendToSockets(rooms, excludes, event as string, args)
+        return op
+      },
+      to: (room: string | string[]) => {
+        const add = typeof room === 'string' ? [room] : room
+        return createBroadcastOperator(rooms.concat(add), excludes)
+      },
+      except: (id: string) => {
+        return createBroadcastOperator(rooms, excludes.concat(id))
+      },
+    }
+    return op
+  }
+
   const _addSocket = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => {
     sockets.set(socket.id, socket)
     emitter.emitReserved('connection', socket)
@@ -27,15 +58,6 @@ export const createNamespace = <
 
   const _removeSocket = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => {
     sockets.delete(socket.id)
-  }
-
-  const _broadcast = (event: string, args: any[], from: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, room?: string) => {
-    for (const [, sock] of sockets) {
-      if (sock === from) continue
-      if (room && !sock.rooms.has(room)) continue
-      const data = [event, ...args]
-      sock._send({ type: PacketType.EVENT, data, nsp: name } as SioPacket)
-    }
   }
 
   const _runMiddleware = (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => {
@@ -81,10 +103,18 @@ export const createNamespace = <
       middlewares.push(fn)
       return nsp
     },
-    // emit: 
+
+    emit: <Ev extends EventNames<EmitEvents>>(event: Ev, ...args: EventParams<EmitEvents, Ev>) => {
+      _sendToSockets([], [], event as string, args)
+      return nsp
+    },
+
+    to: (room: string | string[]) => createBroadcastOperator(typeof room === 'string' ? [room] : room, []),
+
+    except: (id: string) => createBroadcastOperator([], [id]),
+
     _addSocket,
     _removeSocket,
-    _broadcast,
     _runMiddleware,
   }
 
