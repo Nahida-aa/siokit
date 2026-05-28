@@ -1,6 +1,6 @@
 {
   "name": "siokit-parser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Socket.IO packet parser — encode, decode, and binary attachment handling for siokit",
   "keywords": [
     "socket.io",
@@ -40,6 +40,6 @@
     "url": "https://github.com/Nahida-aa/siokit.git"
   },
   "dependencies": {
-    "siokit-core": "^0.1.0"
+    "siokit-core": "^0.1.2"
   }
 }
