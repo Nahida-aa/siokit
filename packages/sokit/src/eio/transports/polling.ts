@@ -24,7 +24,6 @@ export const newPollingConn = (
   },
 ) => {
   const outputBuffer: string[] = []
-  let initialized = false
   let pendingResolve: ((resp: Response) => void) | null = null
   let pendingTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -63,11 +62,6 @@ export const newPollingConn = (
   }
 
   const onPoll = async (req: Request): Promise<Response> => {
-    if (!initialized) {
-      initialized = true
-      conn.sendOpen()
-      conn.startPingTimers()
-    }
     let payload = drain()
     if (payload) return buildResp(payload, req)
     return new Promise<Response>((resolve) => {

@@ -61,8 +61,8 @@ export const createSocket = <
         }
         if (args.length > 0) {
           const eventName = args[0]
-          const eventArgs: any[] = args.slice(1)
-          ;(emitter as any).emit(eventName, ...eventArgs)
+          const eventArgs: any = args.slice(1)
+          ;(emitter).emit(eventName, ...eventArgs)
         }
         break
       }

@@ -25,8 +25,6 @@ export const newWsConn = (
   opts?: { pingInterval?: number; pingTimeout?: number; maxPayload?: number },
 ) => {
   const conn = newConn((data) => { ws.send(data) }, opts)
-  conn.sendOpen()
-  conn.startPingTimers()
   return { ...conn, raw: ws }
 }
 

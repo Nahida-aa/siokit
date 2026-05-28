@@ -1,4 +1,5 @@
 import { newEventBus } from '../../core/eventBus.ts'
+import { newDecoder } from '../../sio/parser/decode.ts';
 import { PACKET_TYPES, PacketType, PacketTypes, type Packet } from '../parser/shared.ts'
 import type { HandshakeData } from '../type.ts'
 
@@ -33,6 +34,7 @@ export const newConn = (
   sendRaw: SendRawFn,
   opts?: { pingInterval?: number; pingTimeout?: number; maxPayload?: number },
 ) => {
+  const decoder = newDecoder()
   const emitter = newEventBus<{}, {}, EioReservedEvents>()
   let pingTimeoutTimer: ReturnType<typeof setTimeout> | null = null
   let pingIntervalTimer: ReturnType<typeof setTimeout> | null = null
@@ -136,6 +138,7 @@ export const newConn = (
 
   return {
     ...emitter,
+    decoder,
     id: hb.sid,
     sendOpen,
     sendMessage,
@@ -146,6 +149,11 @@ export const newConn = (
     close: _close,
     get closed() { return closed },
   }
+}
+
+export const initTransport = (conn: Conn) => {
+  conn.sendOpen()
+  conn.startPingTimers()
 }
 
 export type Conn = ReturnType<typeof newConn>

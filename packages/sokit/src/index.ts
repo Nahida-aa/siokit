@@ -1,7 +1,6 @@
 export { createServer } from './sio/server.ts'
 export type { Socket } from './sio/socket.ts'
 export type { Namespace } from './sio/namespace.ts'
-// export { createClient } from './sio/client.ts'
 export { createNamespace } from './sio/namespace.ts'
 export { PacketType } from './sio/parser/index.ts'
 export type { SioPacket } from './sio/parser/index.ts'

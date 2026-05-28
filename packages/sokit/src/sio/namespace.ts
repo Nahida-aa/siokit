@@ -83,7 +83,7 @@ export const createNamespace = <
     on: <Ev extends ReservedOrUserEventNames<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}>>(
       event: Ev,
       fn: ReservedOrUserListener<NsReservedEvents<Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>, {}, Ev>,
-    ) => { emitter.on(event, fn as any); return nsp },
+    ) => { emitter.on(event, fn); return nsp },
 
     use: (fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: Error) => void) => void) => {
       middlewares.push(fn)

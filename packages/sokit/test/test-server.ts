@@ -1,5 +1,5 @@
 import { createServer } from '../src/index.ts'
-import { WsSession } from '../src/sio/server.ts';
+import { WsSession } from '../src/eio/server.ts';
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './types.ts';
 
 
@@ -82,7 +82,7 @@ console.log('Starting server on port 4000...')
 Bun.serve<WsSession>({
   port: 4000,
   fetch(req, server) {
-    if (server.upgrade(req, {} as any)) {
+    if (server.upgrade(req, {} as any )) {
       return
     }
     return app.fetch(req)
